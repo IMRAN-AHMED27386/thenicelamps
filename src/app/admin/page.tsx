@@ -150,7 +150,7 @@ export default function AdminPage() {
 }
 
 function Login() {
-  const [email, setEmail] = useState("contact@aidavibes.com");
+  const [email, setEmail] = useState("contact@thenicelamps.com");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 

@@ -8,11 +8,10 @@ export default function Footer() {
       <div className="ft-grid">
         <div className="ft-brand">
           <Link href="/" className="nav-logo-img">
-            <img src="/logo1.png?v=10" alt="AidaVibes" className="custom-logo" />
+            <img src="/logo1.png?v=10" alt="TheNiceLamps" className="custom-logo" />
           </Link>
           <p>
-            Elegant fashion for every woman. Your premium destination for
-            Pakistani suits, co-ord sets, Anarkali frocks and so much more.
+            Brilliance in Every Corner. Your premium destination for luxury chandeliers, modern floor lamps, and elegant wall sconces.
           </p>
         </div>
 
@@ -40,7 +39,7 @@ export default function Footer() {
         <div className="ft-col">
           <h4>Connect</h4>
           <ul>
-            <li><a href="mailto:contact@aidavibes.com">Email</a></li>
+            <li><a href="mailto:contact@thenicelamps.com">Email</a></li>
             <li>
               <a
                 href="https://wa.me/919650363038"
@@ -58,8 +57,8 @@ export default function Footer() {
       <div className="ft-bottom">
         <p className="ft-copy">
           &copy; 2026{" "}
-          <a href="https://aidavibes.com" target="_blank" rel="noopener">
-            AidaVibes.com
+          <a href="https://thenicelamps.com" target="_blank" rel="noopener">
+            TheNiceLamps.com
           </a>{" "}
           &mdash; All Rights Reserved
         </p>
