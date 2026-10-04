@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       "Elevate your space with premium fancy lighting, chandeliers, and floor lamps at TheNiceLamps.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1733470381571-c3d082e68457?w=1200&h=630&q=80&auto=format&fit=crop",
+        url: "https://images.unsplash.com/photo-1543198126-a8ad8e47fb22?w=1200&h=630&q=80&auto=format&fit=crop",
         width: 1200,
         height: 630,
         alt: "TheNiceLamps – Premium Fancy Lighting",
