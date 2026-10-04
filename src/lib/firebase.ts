@@ -5,12 +5,12 @@ import { getStorage } from "firebase/storage";
 
 // Firebase web config is public by design — security comes from Firestore rules.
 export const firebaseConfig = {
-  apiKey: "AIzaSyBjn9IrPqzauFNmrX8PYoCSkruhqy2fQ3I",
+  apiKey: "AIzaSyDZdEAgOzhXkUizwml-Qr1bNFvKRY2IXvI",
   authDomain: "thenicelamps-store.firebaseapp.com",
   projectId: "thenicelamps-store",
   storageBucket: "thenicelamps-store.firebasestorage.app",
-  messagingSenderId: "301401457131",
-  appId: "1:301401457131:web:32f5495803a777ba9d99ae",
+  messagingSenderId: "255612299551",
+  appId: "1:255612299551:web:99c3bc19a391861478e82a",
 };
 
 export const app =
