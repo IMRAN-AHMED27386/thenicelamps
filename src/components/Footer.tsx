@@ -43,14 +43,14 @@ export default function Footer() {
             <li><a href="mailto:contact@aidavibes.com">Email</a></li>
             <li>
               <a
-                href="https://wa.me/917011953564"
+                href="https://wa.me/919650363038"
                 target="_blank"
                 rel="noopener"
               >
                 WhatsApp
               </a>
             </li>
-            <li><a href="tel:+917011953564">Call Us</a></li>
+            <li><a href="tel:+919650363038">Call Us</a></li>
           </ul>
         </div>
       </div>

@@ -250,10 +250,10 @@ export default async function Home() {
             <span className="cc-sub">Tap to send us an email</span>
           </a>
 
-          <a href="tel:+917011953564" className="contact-card rv d2">
+          <a href="tel:+919650363038" className="contact-card rv d2">
             <div className="cc-ico">📞</div>
             <span className="cc-lbl">Call / WhatsApp</span>
-            <span className="cc-value">+91 70119 53564</span>
+            <span className="cc-value">+91 96503 63038</span>
             <span className="cc-sub">Tap to call us directly</span>
           </a>
         </div>
