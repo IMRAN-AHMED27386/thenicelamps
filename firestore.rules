@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /products/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /subscribers/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Back-in-stock requests: anyone may leave one (create-only), admins manage
+    match /stockRequests/{id} {
+      allow read, delete: if isAdmin();
+      allow update: if false;
+      allow create: if
+        request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 120
+        && request.resource.data.email.matches('.+@.+[.].+')
+        && request.resource.data.productSlug is string
+        && request.resource.data.productSlug.size() >= 1
+        && request.resource.data.productSlug.size() <= 120
+        && request.resource.data.productName is string
+        && request.resource.data.productName.size() >= 1
+        && request.resource.data.productName.size() <= 120
+        && request.resource.data.createdAt is string
+        && request.resource.data.keys().hasOnly(['email', 'productSlug', 'productName', 'createdAt']);
+    }
+
+    match /customers/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /orders/{id} {
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+      allow create: if
+        request.resource.data.status == 'new'
+        && request.resource.data.payment == 'cod'
+        && (!('userId' in request.resource.data)
+            || (request.auth != null
+                && request.resource.data.userId == request.auth.uid))
+        && request.resource.data.customer is map
+        && request.resource.data.customer.name is string
+        && request.resource.data.customer.name.size() >= 2
+        && request.resource.data.customer.name.size() <= 80
+        && request.resource.data.customer.phone is string
+        && request.resource.data.customer.phone.size() >= 8
+        && request.resource.data.customer.phone.size() <= 20
+        && request.resource.data.customer.address is string
+        && request.resource.data.customer.address.size() >= 6
+        && request.resource.data.customer.address.size() <= 400
+        && request.resource.data.items is list
+        && request.resource.data.items.size() >= 1
+        && request.resource.data.items.size() <= 25
+        && request.resource.data.total is number
+        && request.resource.data.total > 0
+        && request.resource.data.total < 1000000;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
