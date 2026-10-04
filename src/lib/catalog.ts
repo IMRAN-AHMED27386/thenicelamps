@@ -38,19 +38,19 @@ export const CATEGORIES: Category[] = [
     slug: "chandeliers",
     name: "Chandeliers",
     tagline: "Elegant centerpieces for your ceiling",
-    image: "/product-2.jpeg",
+    image: "https://images.unsplash.com/photo-1543198126-a8ad8e47fb22?w=800&q=80",
   },
   {
     slug: "floor-lamps",
     name: "Floor Lamps",
     tagline: "Ambient lighting for every corner",
-    image: "/product-4.jpeg",
+    image: "https://images.unsplash.com/photo-1507149833265-60c372daea22?w=800&q=80",
   },
   {
     slug: "wall-sconces",
     name: "Wall Sconces",
     tagline: "Warm accents for your walls",
-    image: "/product-5.jpeg",
+    image: "https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=800&q=80",
   },
 ];
 
@@ -63,7 +63,7 @@ export const PRODUCTS: Product[] = [
     fabric: "Premium Crystal & Gold Finish",
     description: "A breathtaking crystal chandelier that brings royal elegance to your living or dining room. Thousands of precision-cut crystals refract light beautifully.",
     sizes: SIZES,
-    images: ["/product-1.jpeg"],
+    images: ["https://images.unsplash.com/photo-1543198126-a8ad8e47fb22?w=800&q=80"],
     featured: true,
   },
   {
@@ -74,7 +74,7 @@ export const PRODUCTS: Product[] = [
     fabric: "Amber Glass & Brass",
     description: "A stunning cascade of amber glass teardrops. This modern chandelier creates a warm, inviting atmosphere and serves as a spectacular focal point.",
     sizes: SIZES,
-    images: ["/product-2.jpeg"],
+    images: ["https://images.unsplash.com/photo-1513506003901-1e6a229e9d15?w=800&q=80"],
     featured: true,
   },
   {
@@ -85,7 +85,7 @@ export const PRODUCTS: Product[] = [
     fabric: "Rose Gold Plated Aluminum & LED",
     description: "A contemporary LED spiral pendant light in a luxurious rose gold finish. Perfect for high ceilings and modern minimalist spaces.",
     sizes: SIZES,
-    images: ["/product-3.jpeg"],
+    images: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&q=80"],
     featured: true,
   },
   {
@@ -96,7 +96,7 @@ export const PRODUCTS: Product[] = [
     fabric: "Solid Wood & Linen Shade",
     description: "A classic Scandinavian-inspired tripod floor lamp. Features a warm linen shade and solid wood legs, perfect for cozy reading corners.",
     sizes: SIZES,
-    images: ["/product-4.jpeg"],
+    images: ["https://images.unsplash.com/photo-1507149833265-60c372daea22?w=800&q=80"],
     featured: true,
   },
   {
@@ -107,7 +107,7 @@ export const PRODUCTS: Product[] = [
     fabric: "Matte Black Metal & Glass Globe",
     description: "An elegant arching floor lamp with a clear glass globe. Provides excellent overhead reading light without requiring ceiling installation.",
     sizes: SIZES,
-    images: ["/product-5.jpeg"],
+    images: ["https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=800&q=80"],
   },
 ];
 
