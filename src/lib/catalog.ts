@@ -122,4 +122,4 @@ export const productsInCategory = (slug: CategorySlug) =>
 
 export const featuredProducts = () => PRODUCTS.filter((p) => p.featured);
 
-export const inr = (n: number) => \`₹\${n.toLocaleString("en-IN")}\`;
+export const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
