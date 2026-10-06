@@ -55,7 +55,7 @@ export default function AddToCart({ product, sizeGuideImg }: { product: Product,
       },
       qty
     );
-    showToast(`Added to cart — ${product.name} (${size}) 💖`, true, {
+    showToast(`Added to cart!`, true, {
       label: "View Cart",
       href: "/cart",
     });
