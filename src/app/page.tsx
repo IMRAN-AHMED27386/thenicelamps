@@ -457,6 +457,74 @@ export default async function NewHomePreview() {
             right: 0;
           }
         }
+
+        /* About & Contact */
+        .about-section {
+          background: #0a0a0a;
+          display: flex;
+          align-items: center;
+          gap: 80px;
+        }
+        .about-text {
+          flex: 1;
+        }
+        .about-text p {
+          color: #9ca3af;
+          line-height: 1.8;
+          font-size: 1.1rem;
+          margin-bottom: 20px;
+        }
+        .about-image-wrap {
+          flex: 1;
+          height: 600px;
+          position: relative;
+        }
+        .about-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.8;
+          border: 1px solid rgba(212,175,55,0.2);
+        }
+        .contact-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 30px;
+          margin-top: 50px;
+        }
+        .contact-box {
+          background: #111;
+          border: 1px solid rgba(212,175,55,0.1);
+          padding: 50px 30px;
+          text-align: center;
+          text-decoration: none;
+          color: #fff;
+          transition: all 0.4s;
+        }
+        .contact-box:hover {
+          border-color: #d4af37;
+          transform: translateY(-5px);
+        }
+        .contact-icon {
+          font-size: 2.5rem;
+          margin-bottom: 20px;
+          display: block;
+        }
+        .contact-box h4 {
+          color: #d4af37;
+          letter-spacing: 2px;
+          margin-bottom: 12px;
+        }
+        
+        @media (max-width: 968px) {
+          .about-section {
+            flex-direction: column;
+          }
+          .about-image-wrap {
+            width: 100%;
+            height: 400px;
+          }
+        }
       `}</style>
 
       <div className="ambient-glow"></div>
@@ -555,6 +623,51 @@ export default async function NewHomePreview() {
         </div>
       </section>
 
+      {/* ABOUT SECTION */}
+      <section id="about" className="section-padding about-section">
+        <div className="about-text">
+          <p style={{ color: '#d4af37', textTransform: 'uppercase', letterSpacing: '4px', fontSize: '13px', marginBottom: '16px' }}>Our Story</p>
+          <h2 style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontWeight: 400, letterSpacing: '2px', fontFamily: 'Cinzel, serif', marginBottom: '30px' }}>
+            About <span className="gold-accent" style={{ fontStyle: 'italic' }}>TheNiceLamps</span>
+          </h2>
+          <p>
+            TheNiceLamps was born from a passion for transforming spaces through the power of light. We believe that lighting isn't just functional—it's the jewelry of your home, setting the mood and reflecting your unique style.
+          </p>
+          <p>
+            From breathtaking crystal chandeliers to sleek, modern floor lamps, our carefully curated collection is designed to illuminate your life and make every room feel extraordinary.
+          </p>
+        </div>
+        <div className="about-image-wrap">
+          <img src="/about1.jpg" alt="Showroom" className="about-img" />
+        </div>
+      </section>
+
+      {/* CONTACT SECTION */}
+      <section id="contact" className="section-padding" style={{ background: '#050505' }}>
+        <div className="section-header">
+          <p>Get In Touch</p>
+          <h2>Contact Us</h2>
+          <div className="divider"></div>
+        </div>
+        
+        <div className="contact-cards">
+          <a href="mailto:contact@thenicelamps.com" className="contact-box">
+            <span className="contact-icon">✉️</span>
+            <h4>Email Us</h4>
+            <span style={{ color: '#9ca3af' }}>contact@thenicelamps.com</span>
+          </a>
+          <a href="tel:+918496944407" className="contact-box">
+            <span className="contact-icon">📞</span>
+            <h4>Call / WhatsApp (Main)</h4>
+            <span style={{ color: '#9ca3af' }}>+91 84969 44407</span>
+          </a>
+          <a href="tel:+918042036786" className="contact-box">
+            <span className="contact-icon">☎️</span>
+            <h4>Call (Alt)</h4>
+            <span style={{ color: '#9ca3af' }}>+91 80420 36786</span>
+          </a>
+        </div>
+      </section>
 
     </main>
   );
