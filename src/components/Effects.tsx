@@ -72,11 +72,7 @@ export default function Effects() {
       </button>
       <div
         className={`toast ${toastVisible ? "show" : ""} ${toast?.action ? "has-action" : ""}`}
-        style={{
-          background: toast?.success === false
-            ? "linear-gradient(135deg, #555, #333)"
-            : "linear-gradient(135deg, #B76E79, #D4A0A7)",
-        }}
+        style={toast?.success === false ? { border: '1px solid rgba(255,100,100,0.4)' } : undefined}
       >
         <span>{toast?.msg}</span>
         {toast?.action && (
