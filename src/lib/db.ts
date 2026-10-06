@@ -6,7 +6,7 @@ import {
   PRODUCTS as FALLBACK_PRODUCTS,
 } from "./catalog";
 
-const PROJECT = "aidavibes-store";
+const PROJECT = "thenicelamps-store";
 const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
 
 type FsValue = {
