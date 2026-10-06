@@ -4,7 +4,7 @@ import { categoryNameOf } from "@/components/ProductCard";
 
 export default async function NewHomePreview() {
   const { categories, products } = await fetchCatalog();
-  const featured = products.filter((p) => p.featured).slice(0, 4);
+  const featured = products.filter((p) => p.featured).slice(0, 3);
 
   return (
     <main className="preview-main">
