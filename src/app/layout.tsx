@@ -47,6 +47,8 @@ export const viewport: Viewport = {
   themeColor: "#140c0f",
 };
 
+import { WishlistProvider } from "@/lib/wishlist";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -66,13 +68,15 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <CartProvider>
-          <Nav />
-          {children}
-          <Footer />
-          <Effects />
-          <BottomTabs />
-        </CartProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <Nav />
+            {children}
+            <Footer />
+            <Effects />
+            <BottomTabs />
+          </CartProvider>
+        </WishlistProvider>
       </body>
     </html>
   );
