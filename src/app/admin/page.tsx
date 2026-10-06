@@ -115,7 +115,14 @@ export default function AdminPage() {
             setIsAdmin(true);
           } else {
             const snap = await getDoc(doc(db, "admins", u.uid));
-            setIsAdmin(snap.exists());
+            if (snap.exists()) {
+              setIsAdmin(true);
+            } else if (u.email) {
+              const emailSnap = await getDoc(doc(db, "admins", u.email.toLowerCase()));
+              setIsAdmin(emailSnap.exists());
+            } else {
+              setIsAdmin(false);
+            }
           }
         } catch {
           setIsAdmin(false);
@@ -902,10 +909,14 @@ function AdminsPanel({ currentUser }: { currentUser: User }) {
     } catch (e) {
       const code = (e as { code?: string })?.code;
       if (code === "auth/email-already-in-use") {
-        showToast(
-          "This email already has an account — ask Claude to link it as admin",
-          false
-        );
+        await setDoc(doc(db, "admins", em), {
+          email: em,
+          addedAt: new Date().toISOString(),
+          note: `Linked existing account by ${currentUser.email}`,
+        });
+        setEmail("");
+        showToast(`Linked existing account ${em} as admin!`);
+        load();
       } else {
         showToast("Could not add admin", false);
       }
