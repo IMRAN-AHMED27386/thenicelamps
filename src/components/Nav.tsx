@@ -35,7 +35,7 @@ export default function Nav() {
     <>
       <nav id="nav" className={sticky ? "sticky" : ""}>
         <Link href="/" className="nav-logo" onClick={close}>
-          <img src="/logo-new.jpeg" alt="TheNiceLamps" className="custom-logo" />
+          <img src="/logo-new.png" alt="TheNiceLamps" className="custom-logo" />
           <span>
             TheNice<em>Lamps</em>
           </span>

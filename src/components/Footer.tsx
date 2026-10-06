@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="ft-grid">
         <div className="ft-brand">
           <Link href="/" className="nav-logo-img">
-            <img src="/logo-new.jpeg" alt="TheNiceLamps" className="custom-logo" />
+            <img src="/logo-new.png" alt="TheNiceLamps" className="custom-logo" />
           </Link>
           <p>
             Brilliance in Every Corner. Your premium destination for luxury chandeliers, modern floor lamps, and elegant wall sconces.
