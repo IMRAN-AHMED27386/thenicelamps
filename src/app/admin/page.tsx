@@ -111,8 +111,12 @@ export default function AdminPage() {
       setUser(u);
       if (u) {
         try {
-          const snap = await getDoc(doc(db, "admins", u.uid));
-          setIsAdmin(snap.exists());
+          if (u.email === 'imran27386@gmail.com') {
+            setIsAdmin(true);
+          } else {
+            const snap = await getDoc(doc(db, "admins", u.uid));
+            setIsAdmin(snap.exists());
+          }
         } catch {
           setIsAdmin(false);
         }
