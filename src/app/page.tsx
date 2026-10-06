@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fetchCatalog } from "@/lib/db";
 import { categoryNameOf } from "@/components/ProductCard";
-
+import HeroSlider from "@/components/HeroSlider";
 export default async function NewHomePreview() {
   const { categories, products } = await fetchCatalog();
   const featured = products.filter((p) => p.featured).slice(0, 3);
@@ -131,101 +131,6 @@ export default async function NewHomePreview() {
           transform-origin: left;
         }
 
-        /* Auto-Sliding Showcase */
-        .hero-showcase {
-          flex: 1;
-          position: relative;
-          height: 70vh;
-          max-height: 750px;
-          border-radius: 300px 300px 0 0; /* Elegant Arch */
-          overflow: hidden;
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-          background: #111;
-        }
-
-        .slide-track {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-
-        .slide-item {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          background-size: cover;
-          background-position: center;
-          animation: crossFade 16s infinite;
-        }
-        
-        .slide-item::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 50%);
-        }
-
-        .slide-info {
-          position: absolute;
-          bottom: 40px;
-          left: 50%;
-          transform: translateX(-50%);
-          text-align: center;
-          width: 80%;
-          z-index: 10;
-        }
-        
-        .slide-info h4 {
-          color: #fff;
-          font-size: 1.5rem;
-          margin-bottom: 12px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-        }
-        
-        .slide-info p {
-          color: #d4af37;
-          font-family: 'Inter', sans-serif;
-          letter-spacing: 2px;
-        }
-
-        .product-badge {
-          position: absolute;
-          top: 16px;
-          left: 16px;
-          background: #d4af37;
-          color: #111;
-          padding: 4px 12px;
-          font-size: 10px;
-          font-weight: bold;
-          text-transform: uppercase;
-          border-radius: 20px;
-          z-index: 10;
-          letter-spacing: 1px;
-        }
-
-        .product-price s {
-          color: #6b7280;
-          font-size: 0.85rem;
-          margin-left: 8px;
-        }
-
-        /* Slide delays */
-        .slide-item:nth-child(2) { animation-delay: 4s; }
-        .slide-item:nth-child(3) { animation-delay: 8s; }
-        .slide-item:nth-child(4) { animation-delay: 12s; }
-
-        @keyframes crossFade {
-          0% { opacity: 0; transform: scale(1.05); }
-          10% { opacity: 1; transform: scale(1); }
-          25% { opacity: 1; transform: scale(1); }
-          35% { opacity: 0; transform: scale(0.95); }
-          100% { opacity: 0; }
-        }
 
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(30px); }
@@ -468,11 +373,6 @@ export default async function NewHomePreview() {
             flex-direction: column;
             align-items: center;
           }
-          .hero-showcase {
-            width: 100%;
-            height: 50vh;
-            border-radius: 20px;
-          }
           .ambient-glow {
             top: 0;
             right: 0;
@@ -567,25 +467,7 @@ export default async function NewHomePreview() {
             </Link>
           </div>
 
-          <div className="hero-showcase">
-            <div className="slide-track">
-              {featured.map((p) => (
-                <div 
-                  key={p.slug} 
-                  className="slide-item"
-                  style={{ backgroundImage: `url('${p.images[0]}')` }}
-                >
-                  <div className="slide-info">
-                    <h4>{p.name}</h4>
-                    <p>
-                      ₹{p.price.toLocaleString("en-IN")} 
-                      <s style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85em', marginLeft: '8px' }}>₹{p.mrp.toLocaleString("en-IN")}</s>
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <HeroSlider featured={featured} />
 
         </div>
       </section>
