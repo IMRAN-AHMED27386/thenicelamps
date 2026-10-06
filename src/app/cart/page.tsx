@@ -152,7 +152,7 @@ export default function CartPage() {
                               </s>
                             )}
                             {discountPercent > 0 && (
-                              <span className="discount-badge" style={{ background: 'rgba(244,63,94,0.1)', color: '#10b981', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(244,63,94,0.2)', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 600 }}>
+                              <span className="discount-badge" style={{ background: 'rgba(212,175,55,0.1)', color: '#e6c565', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(212,175,55,0.2)', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 600 }}>
                                 {discountPercent}% OFF
                               </span>
                             )}
@@ -337,7 +337,7 @@ export default function CartPage() {
                 )}
               </div>
 
-              <Link href="/checkout" className="cart-btn-lock" style={{ textDecoration: 'none', background: 'linear-gradient(135deg, rgba(244,63,94,0.9), rgba(244,63,94,0.6))', border: 'none', borderRadius: '8px', width: '100%', padding: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', color: 'white', fontWeight: 600, fontSize: '0.95rem', letterSpacing: '0.05em' }}>
+              <Link href="/checkout" className="cart-btn-lock" style={{ textDecoration: 'none', background: 'var(--grad-main)', border: 'none', borderRadius: '8px', width: '100%', padding: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', color: 'white', fontWeight: 600, fontSize: '0.95rem', letterSpacing: '0.05em' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
