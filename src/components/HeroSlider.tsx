@@ -96,9 +96,12 @@ export default function HeroSlider({ featured }: { featured: Product[] }) {
         }
         @media (max-width: 968px) {
           .hero-showcase {
+            flex: none;
             width: 100%;
             height: 50vh;
+            min-height: 400px;
             border-radius: 20px;
+            display: block;
           }
         }
       `}</style>
