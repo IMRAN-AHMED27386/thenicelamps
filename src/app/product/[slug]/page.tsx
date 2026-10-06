@@ -137,7 +137,7 @@ export default async function ProductPage({
             <p className="pdp-desc">{product.description}</p>
             <ul className="pdp-meta">
               <li>
-                <strong>Fabric:</strong> {product.fabric}
+                <strong>Material / Finish:</strong> {product.fabric}
               </li>
               <li>
                 <strong>Delivery:</strong> {settings.deliveryText}

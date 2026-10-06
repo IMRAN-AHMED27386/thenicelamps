@@ -2,14 +2,10 @@
 
 import { useEffect } from "react";
 
-// Standard India/Pakistan women's suit sizing, in inches.
+// Generic dimensions guide
 const ROWS = [
-  { size: "XS", bust: "32", waist: "26", hip: "35" },
-  { size: "S", bust: "34", waist: "28", hip: "37" },
-  { size: "M", bust: "36", waist: "30", hip: "39" },
-  { size: "L", bust: "38", waist: "32", hip: "41" },
-  { size: "XL", bust: "40", waist: "34", hip: "43" },
-  { size: "XXL", bust: "42", waist: "36", hip: "45" },
+  { size: "Standard", w: "12", h: "18", d: "12" },
+  { size: "Large", w: "16", h: "24", d: "16" },
 ];
 
 export default function SizeGuide({ onClose, image }: { onClose: () => void, image?: string }) {
@@ -51,18 +47,18 @@ export default function SizeGuide({ onClose, image }: { onClose: () => void, ima
               <thead>
                 <tr>
                   <th>Size</th>
-                  <th>Bust</th>
-                  <th>Waist</th>
-                  <th>Hip</th>
+                  <th>Width</th>
+                  <th>Height</th>
+                  <th>Depth</th>
                 </tr>
               </thead>
               <tbody>
                 {ROWS.map((r) => (
                   <tr key={r.size}>
                     <td className="sg-size">{r.size}</td>
-                    <td>{r.bust}"</td>
-                    <td>{r.waist}"</td>
-                    <td>{r.hip}"</td>
+                    <td>{r.w}"</td>
+                    <td>{r.h}"</td>
+                    <td>{r.d}"</td>
                   </tr>
                 ))}
               </tbody>
@@ -72,21 +68,17 @@ export default function SizeGuide({ onClose, image }: { onClose: () => void, ima
               <p className="sg-tips-head">How to measure</p>
               <ul>
                 <li>
-                  <strong>Bust:</strong> measure around the fullest part of your
-                  chest.
+                  <strong>Width:</strong> measure across the widest part.
                 </li>
                 <li>
-                  <strong>Waist:</strong> measure around the narrowest part of your
-                  waistline.
+                  <strong>Height:</strong> measure from the top to the base.
                 </li>
                 <li>
-                  <strong>Hip:</strong> measure around the fullest part of your
-                  hips.
+                  <strong>Depth:</strong> measure the projection from the wall.
                 </li>
               </ul>
               <p className="sg-note">
-                Between two sizes? We recommend choosing the larger one for a
-                comfortable fit.
+                Slight variations may occur due to manual measurements.
               </p>
             </div>
           </>

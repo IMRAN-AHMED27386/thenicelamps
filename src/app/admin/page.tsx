@@ -1045,7 +1045,7 @@ function ProductForm({
   const [fabric, setFabric] = useState(product?.fabric ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
   const [sizes, setSizes] = useState(
-    (product?.sizes ?? ["XS", "S", "M", "L", "XL", "XXL"]).join(", ")
+    (product?.sizes ?? ["Standard"]).join(", ")
   );
   const [images, setImages] = useState<string[]>(
     product?.images?.length ? product.images : [""]
@@ -1153,7 +1153,7 @@ function ProductForm({
             </select>
           </div>
           <div>
-            <label className="admin-label">Fabric</label>
+            <label className="admin-label">Material / Finish</label>
             <input
               className="admin-input"
               value={fabric}
