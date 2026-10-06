@@ -60,15 +60,15 @@ export async function POST(request: Request) {
   const autoReply = transporter.sendMail({
     from: `"TheNiceLamps" <${user}>`,
     to: email,
-    subject: `We'll save you one! 💡 — ${productName}`,
+    subject: `We'll save you one! 🌸 — ${productName}`,
     text:
       `Hello!\n\n` +
       `Thank you for your interest in "${productName}" — it's currently out of ` +
       `stock, but you're on the list: the moment it's back, you'll be the ` +
       `first to know.\n\n` +
       `${productUrl}\n\n` +
-      `Brilliance in Every Corner\nhttps://thenicelamps.com\n\n` +
-      `Warmly,\nThe TheNiceLamps Team 💡`,
+      `Elegant Fashion for Every Woman\nhttps://thenicelamps.com\n\n` +
+      `With love,\nThe TheNiceLamps Team 💖`,
   });
 
   try {

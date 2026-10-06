@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { db } from "./firebase";
 import { CartItem } from "./cart";
 
@@ -27,6 +27,16 @@ export type OrderCustomer = {
   pincode: string;
 };
 
+export type Coupon = {
+  id: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minOrderValue: number;
+  active: boolean;
+  createdAt: string;
+};
+
 export type Order = {
   id: string;
   createdAt: string;
@@ -37,6 +47,8 @@ export type Order = {
   items: CartItem[];
   subtotal: number;
   delivery: number;
+  couponCode?: string;
+  couponDiscount?: number;
   total: number;
 };
 
@@ -49,7 +61,7 @@ export function makeOrderId(): string {
   const rand = Array.from({ length: 4 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".charAt(Math.floor(Math.random() * 32))
   ).join("");
-  return `TNL-${ymd}-${rand}`;
+  return `AV-${ymd}-${rand}`;
 }
 
 export async function placeOrder(
@@ -57,7 +69,9 @@ export async function placeOrder(
   items: CartItem[],
   subtotal: number,
   delivery: number,
-  userId?: string
+  userId?: string,
+  couponCode?: string,
+  couponDiscount?: number
 ): Promise<Order> {
   const order: Order = {
     id: makeOrderId(),
@@ -69,16 +83,38 @@ export async function placeOrder(
     items,
     subtotal,
     delivery,
-    total: subtotal + delivery,
+    ...(couponCode ? { couponCode } : {}),
+    ...(couponDiscount ? { couponDiscount } : {}),
+    total: subtotal + delivery - (couponDiscount || 0),
   };
   await setDoc(doc(db, "orders", order.id), order);
 
-  // Best-effort owner notification; never blocks the order.
-  fetch("/api/order-notify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(order),
-  }).catch(() => {});
+  for (const item of items) {
+    if (!item.slug) continue;
+    try {
+      const prodRef = doc(db, "products", item.slug);
+      const snap = await getDoc(prodRef);
+      if (snap.exists()) {
+        const pData = snap.data();
+        const currentQty = typeof pData.stockQty === "number" ? pData.stockQty : null;
+        const currentSold = typeof pData.soldCount === "number" ? pData.soldCount : 0;
+        const quantity = item.qty || 1;
+        const updates: Record<string, any> = {
+          soldCount: currentSold + quantity,
+        };
+        if (currentQty !== null) {
+          const nextQty = Math.max(0, currentQty - quantity);
+          updates.stockQty = nextQty;
+          if (nextQty === 0) {
+            updates.inStock = false;
+          }
+        }
+        await updateDoc(prodRef, updates);
+      }
+    } catch (e) {
+      console.error("Failed to update inventory for", item.slug, e);
+    }
+  }
 
   return order;
 }

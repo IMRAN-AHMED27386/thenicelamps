@@ -59,6 +59,8 @@ export default function ShopClient({
             key={p.slug}
             product={p}
             categoryName={categoryNameOf(categories, p.category)}
+            averageRating={p.averageRating}
+            reviewCount={p.reviewCount}
           />
         ))}
       </div>

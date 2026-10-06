@@ -23,6 +23,9 @@ export type Product = {
   inStock?: boolean;
   stockQty?: number | null;
   sortOrder?: number;
+  averageRating?: number;
+  reviewCount?: number;
+  soldCount?: number;
 };
 
 export function isOutOfStock(p: Product): boolean {
