@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/catalog";
 
 export default function HeroSlider({ featured }: { featured: Product[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
