@@ -120,7 +120,7 @@ export default function ComingSoon() {
         }}
       >
         <Image
-          src="/logo1.png"
+          src="/logo-new.jpeg"
           alt="TheNiceLamps Logo"
           width={120}
           height={120}

@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="ft-grid">
         <div className="ft-brand">
           <Link href="/" className="nav-logo-img">
-            <img src="/logo1.png?v=10" alt="TheNiceLamps" className="custom-logo" />
+            <img src="/logo-new.jpeg" alt="TheNiceLamps" className="custom-logo" />
           </Link>
           <p>
             Brilliance in Every Corner. Your premium destination for luxury chandeliers, modern floor lamps, and elegant wall sconces.
@@ -42,15 +42,25 @@ export default function Footer() {
             <li><a href="mailto:contact@thenicelamps.com">Email</a></li>
             <li>
               <a
-                href="https://wa.me/919650363038"
+                href="https://wa.me/918496944407"
                 target="_blank"
                 rel="noopener"
               >
                 WhatsApp
               </a>
             </li>
-            <li><a href="tel:+919650363038">Call Us</a></li>
+            <li><a href="tel:+918496944407">Call Us (Main)</a></li>
+            <li><a href="tel:+918042036786">Call Us (Alt)</a></li>
           </ul>
+        </div>
+
+        <div className="ft-col" style={{ maxWidth: '250px' }}>
+          <h4>Address</h4>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", lineHeight: "1.6", marginTop: "1rem" }}>
+            <strong>Firoz Ahmed</strong><br/>
+            11, B.V.K. Iyengar Road,<br/>
+            Bengaluru – 560 053
+          </p>
         </div>
       </div>
 

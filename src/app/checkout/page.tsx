@@ -152,7 +152,7 @@ export default function CheckoutPage() {
                 className="admin-linkbtn"
                 target="_blank"
                 rel="noopener"
-                href={`https://wa.me/919650363038?text=${encodeURIComponent(
+                href={`https://wa.me/918496944407?text=${encodeURIComponent(
                   `Hi TheNiceLamps! I just placed order ${placed.id}.`
                 )}`}
               >

@@ -228,7 +228,7 @@ export default async function Home() {
           At <em>TheNiceLamps</em>, we give everyone the power to illuminate their
           spaces with brilliance.&rdquo;
         </p>
-        <p className="q-by rv">&mdash; TheNiceLamps Founder</p>
+        <p className="q-by rv">&mdash; Firoz Ahmed (Owner)</p>
       </section>
 
       <section className="contact-section" id="contact">
@@ -250,11 +250,18 @@ export default async function Home() {
             <span className="cc-sub">Tap to send us an email</span>
           </a>
 
-          <a href="tel:+919650363038" className="contact-card rv d2">
+          <a href="tel:+918496944407" className="contact-card rv d2">
             <div className="cc-ico">📞</div>
-            <span className="cc-lbl">Call / WhatsApp</span>
-            <span className="cc-value">+91 96503 63038</span>
+            <span className="cc-lbl">Call / WhatsApp (Main)</span>
+            <span className="cc-value">+91 84969 44407</span>
             <span className="cc-sub">Tap to call us directly</span>
+          </a>
+
+          <a href="tel:+918042036786" className="contact-card rv d2" style={{ animationDelay: '0.4s' }}>
+            <div className="cc-ico">☎️</div>
+            <span className="cc-lbl">Call (Alt)</span>
+            <span className="cc-value">+91 80420 36786</span>
+            <span className="cc-sub">Alternative contact number</span>
           </a>
         </div>
       </section>
