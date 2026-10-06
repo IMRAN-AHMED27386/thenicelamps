@@ -193,7 +193,28 @@ export default async function NewHomePreview() {
           letter-spacing: 2px;
         }
 
-        .slide-item:nth-child(1) { animation-delay: 0s; }
+        .product-badge {
+          position: absolute;
+          top: 16px;
+          left: 16px;
+          background: #d4af37;
+          color: #111;
+          padding: 4px 12px;
+          font-size: 10px;
+          font-weight: bold;
+          text-transform: uppercase;
+          border-radius: 20px;
+          z-index: 10;
+          letter-spacing: 1px;
+        }
+
+        .product-price s {
+          color: #6b7280;
+          font-size: 0.85rem;
+          margin-left: 8px;
+        }
+
+        /* Slide delays */
         .slide-item:nth-child(2) { animation-delay: 4s; }
         .slide-item:nth-child(3) { animation-delay: 8s; }
         .slide-item:nth-child(4) { animation-delay: 12s; }
@@ -556,7 +577,10 @@ export default async function NewHomePreview() {
                 >
                   <div className="slide-info">
                     <h4>{p.name}</h4>
-                    <p>₹{p.price.toLocaleString("en-IN")}</p>
+                    <p>
+                      ₹{p.price.toLocaleString("en-IN")} 
+                      <s style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85em', marginLeft: '8px' }}>₹{p.mrp.toLocaleString("en-IN")}</s>
+                    </p>
                   </div>
                 </div>
               ))}
@@ -604,12 +628,17 @@ export default async function NewHomePreview() {
           {featured.map((p) => (
             <Link href={`/product/${p.slug}`} key={p.slug} className="product-card">
               <div className="product-img-wrap">
+                {p.mrp > p.price && (
+                  <span className="product-badge">{Math.round(((p.mrp - p.price) / p.mrp) * 100)}% OFF</span>
+                )}
                 <img src={p.images[0]} alt={p.name} className="product-img" />
               </div>
               <div className="product-info">
                 <p className="product-cat">{categoryNameOf(categories, p.category)}</p>
                 <h4 className="product-name">{p.name}</h4>
-                <p className="product-price">₹{p.price.toLocaleString("en-IN")}</p>
+                <p className="product-price">
+                  ₹{p.price.toLocaleString("en-IN")} <s>₹{p.mrp.toLocaleString("en-IN")}</s>
+                </p>
                 <span className="product-btn">View Details</span>
               </div>
             </Link>
