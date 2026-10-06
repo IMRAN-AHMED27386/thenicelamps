@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "TheNiceLamps – Elegant Fashion for Every Woman",
+    name: "TheNiceLamps – Premium Fancy Lighting",
     short_name: "TheNiceLamps",
     description:
-      "Premium Pakistani suits, co-ord sets and Anarkali frocks. Elegant fashion for every woman at TheNiceLamps.",
+      "Elevate your space with premium fancy lighting, chandeliers, and floor lamps at TheNiceLamps.",
     start_url: "/",
     display: "standalone",
     background_color: "#140c0f",

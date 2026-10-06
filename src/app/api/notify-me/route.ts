@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       `stock, but you're on the list: the moment it's back, you'll be the ` +
       `first to know.\n\n` +
       `${productUrl}\n\n` +
-      `Elegant Fashion for Every Woman\nhttps://thenicelamps.com\n\n` +
+      `Premium Fancy Lighting\nhttps://thenicelamps.com\n\n` +
       `With love,\nThe TheNiceLamps Team 💖`,
   });
 

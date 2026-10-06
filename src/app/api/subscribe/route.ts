@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       `Hello!\n\n` +
       `Thank you for joining the TheNiceLamps list — you're officially one of the first ` +
       `to hear about new arrivals, early access and member-only style drops.\n\n` +
-      `Elegant Fashion for Every Woman\nhttps://thenicelamps.com\n\n` +
+      `Premium Fancy Lighting\nhttps://thenicelamps.com\n\n` +
       `With love,\nThe TheNiceLamps Team 💖`,
   });
 
