@@ -6,28 +6,28 @@
       --rose-gold-light:  #e6c565;
       --rose-gold-xlight: #f7e092;
       --rose-gold-dark:   #b59223;
-      --soft-pink:        #111111;
-      --soft-pink-light:  #222222;
+      --soft-pink:        #e6c565;
+      --soft-pink-light:  #f7e092;
       --blush:            #1a1a1a;
       --white:            #FFFFFF;
-      --off-white:        #050505;
+      --off-white:        #f5f5f5;
       --cream:            #0a0a0a;
       --charcoal:         #0a0a0a;
       --charcoal-light:   #222222;
       --charcoal-mid:     #111111;
       --charcoal-dark:    #050505;
 
-      --grad-main:   linear-gradient(135deg, #d4af37 0%, #C9878F 40%, #e6c565 70%, #111111 100%);
+      --grad-main:   linear-gradient(135deg, #b59223 0%, #d4af37 40%, #e6c565 70%, #b59223 100%);
       --grad-hero:   linear-gradient(155deg, #050505 0%, #0a0a0a 30%, #111111 65%, #050505 100%);
       --grad-dark:   linear-gradient(135deg, #050505 0%, #0a0a0a 100%);
       --grad-card:   linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
 
-      --shadow-rose: 0 8px 32px rgba(183,110,121,0.3);
+      --shadow-rose: 0 8px 32px rgba(212,175,55,0.2);
       --shadow-deep: 0 24px 64px rgba(0,0,0,0.2);
       --shadow-card: 0 16px 48px rgba(0,0,0,0.12);
 
       --border-glass: 1px solid rgba(255,255,255,0.15);
-      --border-rose:  1px solid rgba(183,110,121,0.25);
+      --border-rose:  1px solid rgba(212,175,55,0.25);
 
       --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
       --font-sans:  'Montserrat', -apple-system, sans-serif;
