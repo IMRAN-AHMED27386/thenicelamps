@@ -18,11 +18,14 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, storage, firebaseConfig } from "@/lib/firebase";
 import { Category, Product, CategorySlug, inr } from "@/lib/catalog";
-import { Order, ORDER_STATUSES, OrderStatus } from "@/lib/orders";
+import { Order, ORDER_STATUSES, OrderStatus, Coupon } from "@/lib/orders";
+import { Review, deleteReview } from "@/lib/reviews";
 import { showToast } from "@/lib/toast";
 
 type EditTarget = Product | "new" | null;
@@ -221,31 +224,20 @@ function Dashboard({
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [requests, setRequests] = useState<StockRequest[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [tab, setTab] = useState<
-    "products" | "orders" | "requests" | "admins" | "settings"
+    "products" | "orders" | "requests" | "reviews" | "admins" | "settings" | "coupons"
   >("products");
   const [editing, setEditing] = useState<EditTarget>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  const loadStaticData = async () => {
     try {
-      const [pSnap, cSnap, oSnap, rSnap] = await Promise.all([
+      const [pSnap, cSnap] = await Promise.all([
         getDocs(collection(db, "products")),
         getDocs(collection(db, "categories")),
-        getDocs(collection(db, "orders")),
-        getDocs(collection(db, "stockRequests")),
       ]);
-      setRequests(
-        rSnap.docs
-          .map((d) => ({ id: d.id, ...d.data() }) as StockRequest)
-          .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-      );
-      setOrders(
-        oSnap.docs
-          .map((d) => d.data() as Order)
-          .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-      );
       const prods = pSnap.docs
         .map((d) => ({ slug: d.id, ...d.data() }) as Product)
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
@@ -259,14 +251,47 @@ function Dashboard({
       setProducts(prods);
       setCategories(cats);
     } catch {
-      showToast("Failed to load data", false);
+      showToast("Failed to load static data", false);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    load();
+    loadStaticData();
+
+    const unsubs = [
+      onSnapshot(collection(db, "orders"), (snap) => {
+        setOrders(
+          snap.docs
+            .map((d) => d.data() as Order)
+            .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        );
+      }),
+      onSnapshot(collection(db, "stockRequests"), (snap) => {
+        setRequests(
+          snap.docs
+            .map((d) => ({ id: d.id, ...d.data() }) as StockRequest)
+            .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        );
+      }),
+      onSnapshot(collection(db, "reviews"), (snap) => {
+        setReviews(
+          snap.docs
+            .map((d) => ({ id: d.id, ...d.data() }) as Review)
+            .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        );
+      }),
+      onSnapshot(collection(db, "coupons"), (snap) => {
+        setCoupons(
+          snap.docs
+            .map((d) => ({ id: d.id, code: d.id, ...d.data() }) as Coupon)
+            .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        );
+      }),
+    ];
+
+    return () => unsubs.forEach((unsub) => unsub());
   }, []);
 
   const remove = async (p: Product) => {
@@ -274,7 +299,7 @@ function Dashboard({
     try {
       await deleteDoc(doc(db, "products", p.slug));
       showToast("Deleted " + p.name);
-      load();
+      loadStaticData();
     } catch {
       showToast("Delete failed", false);
     }
@@ -332,7 +357,9 @@ function Dashboard({
                   ? "Orders"
                   : tab === "requests"
                     ? "Stock Requests"
-                    : "Admins"}
+                    : tab === "reviews"
+                      ? "Reviews"
+                      : "Admins"}
             </h1>
           </div>
           <div className="admin-head-actions">
@@ -370,10 +397,22 @@ function Dashboard({
             Requests ({requests.length})
           </button>
           <button
+            className={`chip ${tab === "reviews" ? "active" : ""}`}
+            onClick={() => setTab("reviews")}
+          >
+            Reviews ({reviews.length})
+          </button>
+          <button
             className={`chip ${tab === "admins" ? "active" : ""}`}
             onClick={() => setTab("admins")}
           >
             Admins
+          </button>
+          <button
+            className={`chip ${tab === "coupons" ? "active" : ""}`}
+            onClick={() => setTab("coupons")}
+          >
+            Coupons ({coupons.length})
           </button>
           <button
             className={`chip ${tab === "settings" ? "active" : ""}`}
@@ -387,18 +426,26 @@ function Dashboard({
           <SettingsPanel />
         ) : tab === "admins" ? (
           <AdminsPanel currentUser={currentUser} />
+        ) : tab === "reviews" ? (
+          loading ? (
+            <p className="admin-loading">Loading reviews…</p>
+          ) : (
+            <AdminReviewsPanel reviews={reviews} onChanged={() => {}} />
+          )
         ) : tab === "requests" ? (
           loading ? (
             <p className="admin-loading">Loading requests…</p>
           ) : (
-            <RequestsPanel requests={requests} onChanged={load} />
+            <RequestsPanel requests={requests} onChanged={() => {}} />
           )
         ) : tab === "orders" ? (
           loading ? (
             <p className="admin-loading">Loading orders…</p>
           ) : (
-            <OrdersPanel orders={orders} onChanged={load} />
+            <OrdersPanel orders={orders} onChanged={() => {}} />
           )
+        ) : tab === "coupons" ? (
+          <CouponsPanel coupons={coupons} />
         ) : loading ? (
           <p className="admin-loading">Loading products…</p>
         ) : (
@@ -458,7 +505,7 @@ function Dashboard({
         )}
 
         {tab === "products" && (
-          <CategoriesEditor categories={categories} onSaved={load} />
+          <CategoriesEditor categories={categories} onSaved={loadStaticData} />
         )}
 
         {editing && (
@@ -470,7 +517,7 @@ function Dashboard({
             onClose={() => setEditing(null)}
             onSaved={() => {
               setEditing(null);
-              load();
+              loadStaticData();
             }}
           />
         )}
@@ -603,13 +650,78 @@ function OrdersPanel({
   orders: Order[];
   onChanged: () => void;
 }) {
+  const [syncing, setSyncing] = useState(false);
+
   const setStatus = async (o: Order, status: OrderStatus) => {
     try {
+      const prevStatus = o.status;
       await setDoc(doc(db, "orders", o.id), { status }, { merge: true });
+
+      // When marking as delivered, ensure product soldCount and stock are updated in Firestore
+      if (status === "delivered" && prevStatus !== "delivered") {
+        for (const it of o.items || []) {
+          const s = it.slug || (it as any).product?.slug;
+          if (s) {
+            try {
+              const pRef = doc(db, "products", s);
+              const snap = await getDoc(pRef);
+              if (snap.exists()) {
+                const pData = snap.data();
+                const currentSold = typeof pData.soldCount === "number" ? pData.soldCount : 0;
+                const currentStock = typeof pData.stockQty === "number" ? pData.stockQty : null;
+                const q = it.qty || (it as any).quantity || 1;
+                const updates: Record<string, any> = {
+                  soldCount: currentSold + q,
+                };
+                if (currentStock !== null && currentStock > 0) {
+                  const nextStock = Math.max(0, currentStock - q);
+                  updates.stockQty = nextStock;
+                  if (nextStock === 0) updates.inStock = false;
+                }
+                await updateDoc(pRef, updates);
+              }
+            } catch (e) {
+              console.error("Failed to update product stats", e);
+            }
+          }
+        }
+      }
+
       showToast(`${o.id} → ${status}`);
       onChanged();
     } catch {
       showToast("Status update failed", false);
+    }
+  };
+
+  const syncSoldCounts = async () => {
+    setSyncing(true);
+    try {
+      const totals: Record<string, number> = {};
+      for (const o of orders) {
+        if (o.status === "cancelled") continue;
+        for (const it of o.items || []) {
+          const s = it.slug || (it as any).product?.slug;
+          if (s) {
+            const q = it.qty || (it as any).quantity || 1;
+            totals[s] = (totals[s] || 0) + q;
+          }
+        }
+      }
+      for (const [slug, count] of Object.entries(totals)) {
+        const pRef = doc(db, "products", slug);
+        const snap = await getDoc(pRef);
+        if (snap.exists()) {
+          const currentSold = snap.data().soldCount || 0;
+          await updateDoc(pRef, { soldCount: Math.max(currentSold, count) });
+        }
+      }
+      showToast("Synced sold quantities for all products! 💖");
+      onChanged();
+    } catch {
+      showToast("Sync failed", false);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -634,7 +746,17 @@ function OrdersPanel({
   }
 
   return (
-    <div className="admin-table">
+    <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+        <button
+          className="btn-rose admin-btn-sm"
+          onClick={syncSoldCounts}
+          disabled={syncing}
+        >
+          {syncing ? "Syncing…" : "⚡ Sync Sold Quantities to Store"}
+        </button>
+      </div>
+      <div className="admin-table">
       {orders.map((o) => (
         <div className="order-card" key={o.id}>
           <div className="order-top">
@@ -705,6 +827,7 @@ function OrdersPanel({
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -930,6 +1053,9 @@ function ProductForm({
   const [stockQty, setStockQty] = useState(
     typeof product?.stockQty === "number" ? String(product.stockQty) : ""
   );
+  const [soldCount, setSoldCount] = useState(
+    typeof product?.soldCount === "number" ? String(product.soldCount) : ""
+  );
   const [busy, setBusy] = useState(false);
 
   const save = async () => {
@@ -964,6 +1090,10 @@ function ProductForm({
             stockQty.trim() === "" || Number.isNaN(Number(stockQty))
               ? null
               : Math.max(0, Math.floor(Number(stockQty))),
+          soldCount:
+            soldCount.trim() === "" || Number.isNaN(Number(soldCount))
+              ? 0
+              : Math.max(0, Math.floor(Number(soldCount))),
           sortOrder: product?.sortOrder ?? nextSortOrder,
           updatedAt: new Date().toISOString(),
         },
@@ -1129,6 +1259,18 @@ function ProductForm({
           placeholder="e.g. 12"
           value={stockQty}
           onChange={(e) => setStockQty(e.target.value)}
+        />
+
+        <label className="admin-label">
+          Sold count (displayed on product page — shows social proof)
+        </label>
+        <input
+          className="admin-input"
+          type="number"
+          min={0}
+          placeholder="e.g. 150"
+          value={soldCount}
+          onChange={(e) => setSoldCount(e.target.value)}
         />
 
         <div className="admin-form-checks">
@@ -1415,6 +1557,204 @@ function SettingsPanel() {
       >
         {busy ? "Saving…" : "Save Settings"}
       </button>
+    </div>
+  );
+}
+
+function AdminReviewsPanel({
+  reviews,
+  onChanged,
+}: {
+  reviews: Review[];
+  onChanged: () => void;
+}) {
+  const removeReview = async (r: Review) => {
+    if (!confirm(`Delete review "${r.title}" by ${r.userName}?`)) return;
+    try {
+      await deleteReview(r.id);
+      showToast("Review deleted");
+      onChanged();
+    } catch {
+      showToast("Delete failed", false);
+    }
+  };
+
+  if (reviews.length === 0) {
+    return (
+      <p className="admin-loading">
+        No reviews yet. When customers leave reviews on products, they&rsquo;ll
+        appear here for moderation.
+      </p>
+    );
+  }
+
+  // Group by product
+  const byProduct = new Map<string, Review[]>();
+  for (const r of reviews) {
+    const list = byProduct.get(r.productSlug) ?? [];
+    list.push(r);
+    byProduct.set(r.productSlug, list);
+  }
+  const groups = [...byProduct.entries()].sort(
+    (a, b) => b[1].length - a[1].length
+  );
+
+  return (
+    <div className="admin-table">
+      {groups.map(([slug, group]) => (
+        <div className="admin-card req-group" key={slug}>
+          <p className="req-title">
+            {slug}{" "}
+            <span className="req-count">
+              {group.length} review{group.length !== 1 ? "s" : ""}
+            </span>
+          </p>
+          {group.map((r) => (
+            <div className="req-row" key={r.id} style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "#F5C518" }}>
+                  {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                </span>
+                <button
+                  className="admin-linkbtn admin-danger"
+                  onClick={() => removeReview(r)}
+                >
+                  Delete
+                </button>
+              </div>
+              <p className="admin-row-name" style={{ fontSize: "0.88rem" }}>
+                {r.title}
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.82rem" }}>
+                {r.comment}
+              </p>
+              <p className="admin-row-meta">
+                {r.userName} ·{" "}
+                {new Date(r.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+                {r.verified && " · ✓ Verified"}
+              </p>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CouponsPanel({ coupons }: { coupons: Coupon[] }) {
+  const [code, setCode] = useState("");
+  const [type, setType] = useState<"percentage" | "fixed">("percentage");
+  const [value, setValue] = useState("");
+  const [minOrder, setMinOrder] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const addCoupon = async () => {
+    const codeId = code.trim().toUpperCase();
+    if (!codeId || !value) {
+      showToast("Code and Value are required", false);
+      return;
+    }
+    setBusy(true);
+    try {
+      const docRef = doc(db, "coupons", codeId);
+      const exists = (await getDoc(docRef)).exists();
+      if (exists) {
+        showToast("Coupon code already exists", false);
+        setBusy(false);
+        return;
+      }
+      await setDoc(docRef, {
+        discountType: type,
+        discountValue: Number(value),
+        minOrderValue: Number(minOrder || 0),
+        active: true,
+        createdAt: new Date().toISOString(),
+      });
+      showToast("Coupon created! 💖");
+      setCode("");
+      setValue("");
+      setMinOrder("");
+    } catch {
+      showToast("Failed to create coupon", false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggleActive = async (c: Coupon) => {
+    try {
+      await updateDoc(doc(db, "coupons", c.id), { active: !c.active });
+      showToast(`Coupon ${c.id} ${!c.active ? "activated" : "deactivated"}`);
+    } catch {
+      showToast("Failed to update status", false);
+    }
+  };
+
+  const removeCoupon = async (c: Coupon) => {
+    if (!confirm(`Delete coupon ${c.id}?`)) return;
+    try {
+      await deleteDoc(doc(db, "coupons", c.id));
+      showToast("Coupon deleted");
+    } catch {
+      showToast("Failed to delete", false);
+    }
+  };
+
+  return (
+    <div className="admin-grid2">
+      <div className="admin-card">
+        <h2 className="checkout-h2">Create Coupon</h2>
+        <label className="admin-label">Coupon Code</label>
+        <input className="admin-input" placeholder="e.g. FLAT500" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
+        
+        <label className="admin-label">Discount Type</label>
+        <select className="admin-input" value={type} onChange={(e) => setType(e.target.value as any)}>
+          <option value="percentage">Percentage (%)</option>
+          <option value="fixed">Fixed Amount (₹)</option>
+        </select>
+        
+        <label className="admin-label">Discount Value</label>
+        <input className="admin-input" type="number" placeholder={type === "percentage" ? "e.g. 10" : "e.g. 500"} value={value} onChange={(e) => setValue(e.target.value)} />
+        
+        <label className="admin-label">Minimum Order Value (optional)</label>
+        <input className="admin-input" type="number" placeholder="e.g. 1999" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} />
+
+        <button className="btn-rose admin-btn" onClick={addCoupon} disabled={busy}>
+          {busy ? "Creating…" : "Create Coupon"}
+        </button>
+      </div>
+
+      <div className="admin-table" style={{ marginTop: 0 }}>
+        {coupons.length === 0 ? (
+          <p className="admin-loading">No coupons created yet.</p>
+        ) : (
+          coupons.map((c) => (
+            <div className="admin-row" key={c.id}>
+              <div className="admin-row-main">
+                <p className="admin-row-name" style={{ color: c.active ? '#10b981' : 'rgba(255,255,255,0.4)' }}>
+                  {c.id} {!c.active && "(Inactive)"}
+                </p>
+                <p className="admin-row-meta">
+                  {c.discountType === "percentage" ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}
+                  {c.minOrderValue > 0 ? ` on orders above ₹${c.minOrderValue}` : ''}
+                </p>
+              </div>
+              <div className="admin-row-toggles">
+                <label className="admin-check" style={{ marginRight: 16 }}>
+                  <input type="checkbox" checked={c.active} onChange={() => toggleActive(c)} /> Active
+                </label>
+                <button className="admin-linkbtn admin-danger" onClick={() => removeCoupon(c)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { fetchCatalog } from "@/lib/db";
 export const metadata = {
   title: "Shop – TheNiceLamps",
   description:
-    "Shop premium chandeliers, floor lamps and wall sconces at TheNiceLamps.",
+    "Shop Pakistani suits, co-ord sets and Anarkali frocks at TheNiceLamps.",
 };
 
 export default async function ShopPage() {

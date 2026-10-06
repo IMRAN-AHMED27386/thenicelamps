@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { inr } from "@/lib/catalog";
-import { placeOrder, Order, OrderCustomer } from "@/lib/orders";
+import { Order, OrderCustomer, placeOrder } from "@/lib/orders";
 import { showToast } from "@/lib/toast";
 import {
   Address,
@@ -13,19 +13,16 @@ import {
   saveAddresses,
   useAuthUser,
 } from "@/lib/customer";
+import { calculateShipping, ShippingResult, DELIVERY_ZONES } from "@/lib/shipping";
+import { validateShippingAction } from "@/app/actions/orderActions";
+import AuthGate from "@/components/AuthGate";
 
 const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir",
-  "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra",
-  "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-  "Uttar Pradesh", "Uttarakhand", "West Bengal", "Other",
+  "Delhi", "Haryana", "Punjab", "Uttar Pradesh"
 ];
 
 export default function CheckoutPage() {
-  const { items, subtotal, clear } = useCart();
-  const delivery = subtotal >= 1999 ? 0 : 99;
+  const { items, subtotal, mrpTotal, savings, coupon, couponDiscount, clear } = useCart();
   const { user } = useAuthUser();
 
   const [name, setName] = useState("");
@@ -39,6 +36,9 @@ export default function CheckoutPage() {
   const [placed, setPlaced] = useState<Order | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [saveAddress, setSaveAddress] = useState(true);
+  
+  const [shippingResult, setShippingResult] = useState<ShippingResult | null>(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
 
   const applyAddress = (a: Address) => {
     setName(a.name);
@@ -61,6 +61,30 @@ export default function CheckoutPage() {
     });
   }, [user]);
 
+  useEffect(() => {
+    if (pincode.length === 6) {
+      setShippingLoading(true);
+      calculateShipping(pincode).then(res => {
+        setShippingResult(res);
+        setShippingLoading(false);
+        if (res.state && INDIAN_STATES.includes(res.state)) {
+          setState(res.state);
+        }
+        if (res.city) {
+          setCity(res.city);
+        }
+      });
+    } else {
+      setShippingResult(null);
+    }
+  }, [pincode]);
+
+  const delivery = DELIVERY_ZONES[state] ?? 0;
+  const isServiceable = shippingResult ? shippingResult.serviceable === true : true;
+  const isStateMismatch = !!(shippingResult?.state && shippingResult.state.toLowerCase() !== state.toLowerCase());
+  
+  const canSubmit = isServiceable && !isStateMismatch && pincode.length === 6 && !busy && !shippingLoading;
+
   const submit = async () => {
     if (name.trim().length < 2) return showToast("Please enter your full name", false);
     if (!/^[6-9]\d{9}$/.test(phone.trim()))
@@ -71,6 +95,12 @@ export default function CheckoutPage() {
     if (city.trim().length < 2) return showToast("Please enter your city", false);
     if (!/^\d{6}$/.test(pincode.trim()))
       return showToast("Please enter a valid 6-digit PIN code", false);
+
+    if (!canSubmit) {
+      if (!isServiceable) return showToast(shippingResult?.error || "Location not serviceable", false);
+      if (isStateMismatch) return showToast("The selected state does not match the PIN code", false);
+      return;
+    }
 
     const customer: OrderCustomer = {
       name: name.trim(),
@@ -84,13 +114,31 @@ export default function CheckoutPage() {
 
     setBusy(true);
     try {
+      const res = await validateShippingAction(pincode.trim(), state);
+      
+      if (!res.valid) {
+        showToast(res.error || "Could not validate delivery location.", false);
+        setBusy(false);
+        return;
+      }
+
+      const deliveryCost = res.shipping.charge || 0;
+
       const order = await placeOrder(
         customer,
         items,
         subtotal,
-        delivery,
-        user?.uid
+        deliveryCost,
+        user?.uid,
+        coupon?.code,
+        couponDiscount
       );
+
+      fetch("/api/order-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      }).catch(() => {});
 
       if (user && saveAddress) {
         const matches = (a: Address) =>
@@ -152,7 +200,7 @@ export default function CheckoutPage() {
                 className="admin-linkbtn"
                 target="_blank"
                 rel="noopener"
-                href={`https://wa.me/918496944407?text=${encodeURIComponent(
+                href={`https://wa.me/917011953564?text=${encodeURIComponent(
                   `Hi TheNiceLamps! I just placed order ${placed.id}.`
                 )}`}
               >
@@ -173,6 +221,19 @@ export default function CheckoutPage() {
           <Link href="/shop" className="btn-rose">
             <span className="btn-ico">✦</span> Start Shopping
           </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="page-main">
+        <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center", padding: "0 24px" }}>
+          <h2 style={{ marginBottom: "24px", color: "var(--white)", fontSize: "1.4rem" }}>
+            Please login to continue checkout
+          </h2>
+          <AuthGate />
         </div>
       </main>
     );
@@ -240,25 +301,39 @@ export default function CheckoutPage() {
 
             <div className="admin-grid2">
               <div>
-                <label className="admin-label">City *</label>
-                <input className="admin-input" value={city}
-                  onChange={(e) => setCity(e.target.value)} />
-              </div>
-              <div>
                 <label className="admin-label">PIN code *</label>
                 <input className="admin-input" inputMode="numeric" placeholder="6 digits"
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))} />
               </div>
+              <div>
+                <label className="admin-label">State *</label>
+                <select className="admin-input" value={state}
+                  onChange={(e) => setState(e.target.value)}>
+                  {INDIAN_STATES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <label className="admin-label">State *</label>
-            <select className="admin-input" value={state}
-              onChange={(e) => setState(e.target.value)}>
-              {INDIAN_STATES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <label className="admin-label">City *</label>
+            <input className="admin-input" value={city}
+              onChange={(e) => setCity(e.target.value)} />
+            
+            {pincode.length === 6 && shippingResult && (!isServiceable || isStateMismatch) && (
+              <div style={{ marginTop: 12, padding: 12, borderRadius: 8, background: 'rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
+                {!isServiceable ? (
+                  <div style={{ color: 'var(--soft-pink)' }}>
+                    <strong>Not Serviceable:</strong> {shippingResult.error}
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--soft-pink)' }}>
+                    <strong>State Mismatch:</strong> The selected state ({state}) does not match the PIN code state ({shippingResult.state}).
+                  </div>
+                )}
+              </div>
+            )}
 
             {user && (
               <label className="admin-check" style={{ marginTop: 16 }}>
@@ -302,27 +377,52 @@ export default function CheckoutPage() {
               <span>Subtotal</span>
               <span>{inr(subtotal)}</span>
             </div>
+            
+            {coupon && (
+              <div className="sum-row" style={{ color: "#10b981" }}>
+                <span>Coupon ({coupon.code})</span>
+                <span>− {inr(couponDiscount)}</span>
+              </div>
+            )}
+
             <div className="sum-row">
               <span>Delivery</span>
-              <span>{delivery === 0 ? "Free" : inr(delivery)}</span>
+              <span>
+                {delivery === 0 ? "FREE" : inr(delivery)}
+              </span>
             </div>
+            
             <div className="sum-row sum-total">
               <span>Total (COD)</span>
-              <span>{inr(subtotal + delivery)}</span>
+              <span>{inr(subtotal + delivery - couponDiscount)}</span>
             </div>
+
+            {savings > 0 && (
+              <div style={{ textAlign: "right", color: "#10b981", fontSize: "0.9rem", marginBottom: "8px", fontWeight: 500 }}>
+                You will save {inr(savings)} on this order
+              </div>
+            )}
+
+            <div style={{ textAlign: "right", fontSize: "0.8rem", opacity: 0.6, marginBottom: "20px" }}>
+              (Inclusive of all taxes & GST)
+            </div>
+            
             <button
               className="btn-rose sum-btn"
-              style={{ opacity: busy ? 0.6 : 1, cursor: busy ? "wait" : "pointer" }}
-              disabled={busy}
+              style={{ opacity: !canSubmit ? 0.4 : (busy ? 0.6 : 1), cursor: !canSubmit ? "not-allowed" : (busy ? "wait" : "pointer") }}
+              disabled={!canSubmit || busy}
               onClick={submit}
             >
               <span className="btn-ico">✦</span>{" "}
               {busy ? "Placing Order…" : "Place Order"}
             </button>
-            <p className="sum-note">
-              By placing this order you agree to pay {inr(subtotal + delivery)}{" "}
-              in cash when your order is delivered.
-            </p>
+            
+            {canSubmit && (
+              <p className="sum-note">
+                By placing this order you agree to pay {inr(subtotal + delivery - couponDiscount)}{" "}
+                in cash when your order is delivered.
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -13,10 +13,13 @@ import {
   signOutCustomer,
   signUpWithEmail,
   useAuthUser,
+  sendOtp,
+  setupRecaptcha,
 } from "@/lib/customer";
 import { Order, fetchOrdersForUser } from "@/lib/orders";
 import { inr } from "@/lib/catalog";
 import { showToast } from "@/lib/toast";
+import AuthGate from "@/components/AuthGate";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -38,144 +41,13 @@ export default function AccountPage() {
     );
   }
 
-  if (!user) return <AuthGate />;
-
-  return <Dashboard user={user} />;
-}
-
-function AuthGate() {
-  const [mode, setMode] = useState<"login" | "signup">("login");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async () => {
-    if (mode === "signup" && name.trim().length < 2)
-      return showToast("Please enter your name", false);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      return showToast("Please enter a valid email", false);
-    if (password.length < 6)
-      return showToast("Password must be at least 6 characters", false);
-
-    setBusy(true);
-    try {
-      if (mode === "signup") {
-        await signUpWithEmail(name, email, password);
-        showToast("Account created — welcome to TheNiceLamps 💡");
-      } else {
-        await signInWithEmail(email, password);
-        showToast("Welcome back 💖");
-      }
-    } catch (e) {
-      const code = (e as { code?: string })?.code ?? "";
-      if (code === "auth/email-already-in-use")
-        showToast("An account already exists — try signing in", false);
-      else if (code === "auth/invalid-credential" || code === "auth/wrong-password")
-        showToast("Incorrect email or password", false);
-      else if (code === "auth/user-not-found")
-        showToast("No account found with that email", false);
-      else showToast("Something went wrong — please try again", false);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const google = async () => {
-    setBusy(true);
-    try {
-      await signInWithGoogle();
-      showToast("Welcome 💖");
-    } catch {
-      showToast("Google sign-in failed", false);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const forgot = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      return showToast("Enter your email above first", false);
-    try {
-      await resetPassword(email);
-      showToast("Password reset email sent to " + email.trim());
-    } catch {
-      showToast("Could not send reset email", false);
-    }
-  };
-
-  return (
+  if (!user) return (
     <main className="page-main">
-      <div className="admin-card admin-narrow">
-        <p className="s-eyebrow">TheNiceLamps</p>
-        <h1 className="admin-title">
-          {mode === "login" ? "Sign In" : "Create Account"}
-        </h1>
-
-        <button className="social-btn social-google" onClick={google} disabled={busy}>
-          Continue with Google
-        </button>
-
-        <div className="social-divider"><span>or</span></div>
-
-        {mode === "signup" && (
-          <>
-            <label className="admin-label">Full name</label>
-            <input
-              className="admin-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </>
-        )}
-        <label className="admin-label">Email</label>
-        <input
-          className="admin-input"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <label className="admin-label">Password</label>
-        <input
-          className="admin-input"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
-
-        <button className="btn-rose admin-btn" onClick={submit} disabled={busy}>
-          <span className="btn-ico">✦</span>{" "}
-          {busy
-            ? "Please wait…"
-            : mode === "login"
-              ? "Sign In"
-              : "Create Account"}
-        </button>
-
-        {mode === "login" ? (
-          <>
-            <button className="admin-linkbtn" onClick={forgot}>
-              Forgot password?
-            </button>
-            <p className="social-switch">
-              New here?{" "}
-              <button className="social-switch-btn" onClick={() => setMode("signup")}>
-                Create an account
-              </button>
-            </p>
-          </>
-        ) : (
-          <p className="social-switch">
-            Already have an account?{" "}
-            <button className="social-switch-btn" onClick={() => setMode("login")}>
-              Sign in
-            </button>
-          </p>
-        )}
-      </div>
+      <AuthGate />
     </main>
   );
+
+  return <Dashboard user={user} />;
 }
 
 function Dashboard({ user }: { user: User }) {

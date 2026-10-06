@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { inr, isOutOfStock } from "@/lib/catalog";
-import { fetchCatalog, fetchSettings, related } from "@/lib/db";
+import {
+  fetchCatalog,
+  fetchSettings,
+  fetchReviewsForProduct,
+  computeRatingSummary,
+  related,
+} from "@/lib/db";
 import AddToCart from "@/components/AddToCart";
 import ProductCard, { categoryNameOf } from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
+import ReviewSection, { Stars } from "@/components/ReviewSection";
 
 export async function generateMetadata({
   params,
@@ -37,16 +44,19 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { categories, products } = await fetchCatalog();
-  const settings = await fetchSettings();
+  const [{ categories, products }, settings, reviews] = await Promise.all([
+    fetchCatalog(),
+    fetchSettings(),
+    fetchReviewsForProduct(slug),
+  ]);
   const product = products.find((p) => p.slug === slug);
   if (!product) notFound();
 
   const categoryData = categories.find((c) => c.slug === product.category);
-
   const catName = categoryNameOf(categories, product.category);
   const off = Math.round(((product.mrp - product.price) / product.mrp) * 100);
   const rel = related(products, product.category, product.slug);
+  const ratingSummary = computeRatingSummary(reviews);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -55,6 +65,16 @@ export default async function ProductPage({
     image: product.images,
     description: product.description,
     brand: { "@type": "Brand", name: "TheNiceLamps" },
+    ...(ratingSummary.total > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: ratingSummary.average.toFixed(1),
+            bestRating: "5",
+            ratingCount: ratingSummary.total,
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       url: `https://thenicelamps.com/product/${product.slug}`,
@@ -92,6 +112,24 @@ export default async function ProductPage({
           <div className="pdp-info">
             <p className="prod-cat">{catName}</p>
             <h1 className="pdp-name">{product.name}</h1>
+
+            {/* ── Rating + Sold badges ── */}
+            <div className="pdp-badges">
+              {ratingSummary.total > 0 && (
+                <a href="#reviews" className="pdp-rating-badge">
+                  <Stars rating={ratingSummary.average} size="sm" />
+                  <span className="pdp-rating-text">
+                    {ratingSummary.average.toFixed(1)} ({ratingSummary.total})
+                  </span>
+                </a>
+              )}
+              {(product.soldCount ?? 0) > 0 && (
+                <span className="pdp-sold-badge">
+                  🔥 {product.soldCount!.toLocaleString("en-IN")} sold
+                </span>
+              )}
+            </div>
+
             <p className="pdp-price">
               {inr(product.price)} <s>{inr(product.mrp)}</s>
               {off > 0 && <span className="pdp-off">{off}% off</span>}
@@ -113,18 +151,27 @@ export default async function ProductPage({
           </div>
         </div>
 
+        {/* ── Reviews Section ── */}
+        <ReviewSection
+          productSlug={product.slug}
+          initialReviews={reviews}
+          initialSummary={ratingSummary}
+        />
+
         {rel.length > 0 && (
           <div className="related">
             <h2 className="s-title rv">
               You May Also <em>Love</em>
             </h2>
-            <div className="s-divider rv"></div>
+            <div className="s-divider rv" />
             <div className="prod-grid">
               {rel.map((p) => (
                 <ProductCard
                   key={p.slug}
                   product={p}
                   categoryName={categoryNameOf(categories, p.category)}
+                  averageRating={p.averageRating}
+                  reviewCount={p.reviewCount}
                 />
               ))}
             </div>
