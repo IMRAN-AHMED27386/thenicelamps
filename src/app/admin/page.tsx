@@ -461,13 +461,14 @@ function Dashboard({
             <input type="text" placeholder="Search products, categories..." className="admin-search-input" />
           </div>
           <div className="admin-top-actions">
-            {tab === "overview"
-                ? "Overview"
-                : tab === "categories"
-                  ? "Categories"
-                  : tab === "products" && (
+            {tab === "products" && (
               <button className="btn-gold admin-btn-sm" onClick={() => setEditing("new")}>
                 + ADD PRODUCT
+              </button>
+            )}
+            {tab === "categories" && (
+              <button className="btn-gold admin-btn-sm" onClick={() => setEditingCategory("new")}>
+                + ADD CATEGORY
               </button>
             )}
             <div className="admin-avatar">
@@ -479,19 +480,23 @@ function Dashboard({
         <div className="admin-content-scroll">
           <div className="admin-content-header">
             <h1 className="admin-title">
-              {tab === "products"
-                ? "Products"
-                : tab === "orders"
-                  ? "Orders"
-                  : tab === "requests"
-                    ? "Stock Requests"
-                    : tab === "reviews"
-                      ? "Reviews"
-                      : tab === "coupons"
-                        ? "Coupons"
-                        : tab === "settings"
-                          ? "Settings"
-                          : "Admins"}
+              {tab === "overview"
+                ? "Overview"
+                : tab === "categories"
+                  ? "Categories"
+                  : tab === "products"
+                    ? "Products"
+                    : tab === "orders"
+                      ? "Orders"
+                      : tab === "requests"
+                        ? "Stock Requests"
+                        : tab === "reviews"
+                          ? "Reviews"
+                          : tab === "coupons"
+                            ? "Coupons"
+                            : tab === "settings"
+                              ? "Settings"
+                              : "Dashboard"}
             </h1>
             <p className="admin-subtitle">
               {tab === "overview" && "Dashboard summary and reports"}
