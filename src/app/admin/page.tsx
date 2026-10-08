@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ShoppingCart, MessageSquare, Star, Tag, Settings, LogOut, Search, User as UserIcon, LayoutDashboard, FolderTree } from "lucide-react";
+import { Package, ShoppingCart, MessageSquare, Star, Tag, Settings, LogOut, Search, User as UserIcon, LayoutDashboard, FolderTree, Calendar, ChevronDown, ArrowRight } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { getApps, initializeApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
@@ -492,7 +493,8 @@ function Dashboard({
         </header>
 
         <div className="admin-content-scroll">
-          <div className="admin-content-header">
+          <div className="admin-content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
             <h1 className="admin-title">
               {tab === "overview"
                 ? "Overview"
@@ -519,6 +521,14 @@ function Dashboard({
               {tab === "orders" && "View and manage customer orders"}
               {tab === "settings" && "Configure store settings"}
             </p>
+            </div>
+            {tab === "overview" && (
+              <div className="admin-search-wrap sm" style={{ background: 'transparent', border: '1px solid #333', cursor: 'pointer' }}>
+                <Calendar size={14} style={{ color: '#888' }} />
+                <span style={{ fontSize: '0.85rem', padding: '0 10px', color: '#ccc' }}>Oct 1, 2026 - Oct 7, 2026</span>
+                <ChevronDown size={14} style={{ color: '#888' }} />
+              </div>
+            )}
           </div>
 
           {tab === "overview" && (
@@ -620,8 +630,113 @@ function Dashboard({
               </div>
             </div>
           ) : tab === "overview" ? (
-            <div className="admin-overview-content">
-              {/* Optional: Add recent orders or more stats here later */}
+            <div className="admin-overview-content" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+              
+              {/* Chart Card */}
+              <div className="admin-panel-card" style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: '0 0 5px 0' }}>Sales Overview</h3>
+                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Total orders and revenue for the selected period</p>
+                  </div>
+                  <div className="admin-search-wrap sm" style={{ width: 'auto', background: 'transparent', border: '1px solid #333' }}>
+                    <span style={{ fontSize: '0.9rem' }}>Orders</span>
+                    <ChevronDown size={14} style={{ marginLeft: 10, color: '#888' }} />
+                  </div>
+                </div>
+                
+                <div style={{ width: '100%', height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={[
+                        { name: 'Oct 1', sales: 1 },
+                        { name: 'Oct 2', sales: 2 },
+                        { name: 'Oct 3', sales: 1 },
+                        { name: 'Oct 4', sales: 3 },
+                        { name: 'Oct 5', sales: 2 },
+                        { name: 'Oct 6', sales: 4 },
+                        { name: 'Oct 7', sales: 3 },
+                      ]}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f5d061" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#f5d061" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                      <XAxis dataKey="name" stroke="#666" tick={{fill: '#888', fontSize: 12}} axisLine={false} tickLine={false} />
+                      <YAxis stroke="#666" tick={{fill: '#888', fontSize: 12}} axisLine={false} tickLine={false} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
+                        itemStyle={{ color: '#f5d061' }}
+                      />
+                      <Area type="monotone" dataKey="sales" stroke="#f5d061" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Recent Orders Card */}
+              <div className="admin-panel-card" style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: '0 0 5px 0' }}>Recent Orders</h3>
+                    <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Latest orders from customers</p>
+                  </div>
+                  <button style={{ background: 'transparent', border: 'none', color: '#f5d061', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    View all <ArrowRight size={14} />
+                  </button>
+                </div>
+                
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem', minWidth: '600px' }}>
+                    <thead>
+                      <tr style={{ color: '#888', borderBottom: '1px solid #222' }}>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>#</th>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>PRODUCT</th>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>CUSTOMER</th>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>AMOUNT</th>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>STATUS</th>
+                        <th style={{ padding: '12px 0', fontWeight: 'normal' }}>DATE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.slice(0, 3).map((o, i) => (
+                        <tr key={o.id} style={{ borderBottom: '1px solid #222' }}>
+                          <td style={{ padding: '12px 0', color: '#ccc' }}>#{o.id.substring(0,4)}</td>
+                          <td style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '30px', height: '30px', borderRadius: '4px', background: '#333', overflow: 'hidden' }}>
+                              {o.items[0]?.image && <img src={o.items[0].image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                            </div>
+                            <span style={{ color: '#ddd' }}>{o.items[0]?.name || 'Unknown'}</span>
+                          </td>
+                          <td style={{ padding: '12px 0', color: '#ccc' }}>{o.customer.name}</td>
+                          <td style={{ padding: '12px 0', color: '#ccc' }}>₹{o.total}</td>
+                          <td style={{ padding: '12px 0' }}>
+                            <span style={{ 
+                              padding: '4px 10px', 
+                              borderRadius: '12px', 
+                              fontSize: '0.8rem',
+                              border: `1px solid ${['confirmed', 'shipped'].includes(o.status) ? '#f5d061' : o.status === 'delivered' ? '#4ade80' : '#888'}`,
+                              color: ['confirmed', 'shipped'].includes(o.status) ? '#f5d061' : o.status === 'delivered' ? '#4ade80' : '#888'
+                            }}>
+                              {o.status === 'new' ? 'Pending' : o.status === 'delivered' ? 'Completed' : ['confirmed', 'shipped'].includes(o.status) ? 'Processing' : o.status.charAt(0).toUpperCase() + o.status.slice(1)}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 0', color: '#888' }}>
+                            {new Date(o.createdAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                      {orders.length === 0 && (
+                        <tr>
+                          <td colSpan={6} style={{ padding: '20px 0', textAlign: 'center', color: '#666' }}>No recent orders</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           ) : loading ? (
             <p className="admin-loading">Loading products…</p>
