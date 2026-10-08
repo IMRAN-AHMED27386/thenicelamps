@@ -61,7 +61,7 @@ export function makeOrderId(): string {
   const rand = Array.from({ length: 4 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".charAt(Math.floor(Math.random() * 32))
   ).join("");
-  return `NL-${ymd}-${rand}`;
+  return `TNL-${ymd}-${rand}`;
 }
 
 export async function placeOrder(

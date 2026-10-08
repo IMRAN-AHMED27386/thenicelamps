@@ -726,7 +726,7 @@ function Dashboard({
                     <tbody>
                       {orders.slice(0, 3).map((o, i) => (
                         <tr key={o.id} style={{ borderBottom: '1px solid #222' }}>
-                          <td style={{ padding: '12px 0', color: '#ccc' }}>#{o.id.substring(0,4)}</td>
+                          <td style={{ padding: '12px 0', color: '#ccc' }}>{o.id}</td>
                           <td style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '30px', height: '30px', borderRadius: '4px', background: '#333', overflow: 'hidden' }}>
                               {o.items[0]?.image && <img src={o.items[0].image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
