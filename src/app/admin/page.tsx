@@ -28,6 +28,20 @@ import { Order, ORDER_STATUSES, OrderStatus, Coupon } from "@/lib/orders";
 import { Review, deleteReview } from "@/lib/reviews";
 import { showToast } from "@/lib/toast";
 
+export type AdminPermissions = {
+  products: boolean;
+  orders: boolean;
+  requests: boolean;
+  reviews: boolean;
+  admins: boolean;
+  settings: boolean;
+  coupons: boolean;
+};
+
+const SUPER_ADMIN = "imran27386@gmail.com";
+const FULL_PERMS: AdminPermissions = { products: true, orders: true, requests: true, reviews: true, admins: true, settings: true, coupons: true };
+const DEFAULT_PERMS: AdminPermissions = { products: false, orders: false, requests: false, reviews: false, admins: false, settings: false, coupons: false };
+
 type EditTarget = Product | "new" | null;
 
 type StockRequest = {
@@ -104,37 +118,37 @@ function UploadButton({
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [permissions, setPermissions] = useState<AdminPermissions | null>(null);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
         try {
-          if (u.email === 'imran27386@gmail.com') {
-            setIsAdmin(true);
+          if (u.email === SUPER_ADMIN) {
+            setPermissions(FULL_PERMS);
           } else {
-            const snap = await getDoc(doc(db, "admins", u.uid));
+            let snap = await getDoc(doc(db, "admins", u.uid));
+            if (!snap.exists() && u.email) {
+              snap = await getDoc(doc(db, "admins", u.email.toLowerCase()));
+            }
             if (snap.exists()) {
-              setIsAdmin(true);
-            } else if (u.email) {
-              const emailSnap = await getDoc(doc(db, "admins", u.email.toLowerCase()));
-              setIsAdmin(emailSnap.exists());
+              setPermissions({ ...DEFAULT_PERMS, ...(snap.data() as Partial<AdminPermissions>) });
             } else {
-              setIsAdmin(false);
+              setPermissions(null);
             }
           }
         } catch {
-          setIsAdmin(false);
+          setPermissions(null);
         }
       } else {
-        setIsAdmin(null);
+        setPermissions(null);
       }
       setAuthReady(true);
     });
   }, []);
 
-  if (!authReady || (user && isAdmin === null)) {
+  if (!authReady || (user && permissions === null && !user.email)) {
     return (
       <main className="page-main">
         <p className="admin-loading">Loading…</p>
@@ -144,7 +158,7 @@ export default function AdminPage() {
 
   if (!user) return <Login />;
 
-  if (!isAdmin) {
+  if (!permissions) {
     return (
       <main className="page-main">
         <div className="admin-card admin-narrow">
@@ -160,7 +174,7 @@ export default function AdminPage() {
     );
   }
 
-  return <Dashboard currentUser={user} onSignOut={() => signOut(auth)} />;
+  return <Dashboard currentUser={user} permissions={permissions} onSignOut={() => signOut(auth)} />;
 }
 
 function Login() {
@@ -226,9 +240,11 @@ function Login() {
 
 function Dashboard({
   currentUser,
+  permissions,
   onSignOut,
 }: {
   currentUser: User;
+  permissions: AdminPermissions;
   onSignOut: () => void;
 }) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -237,9 +253,19 @@ function Dashboard({
   const [requests, setRequests] = useState<StockRequest[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [tab, setTab] = useState<
-    "products" | "orders" | "requests" | "reviews" | "admins" | "settings" | "coupons"
-  >("products");
+  
+  const getInitialTab = (): keyof AdminPermissions => {
+    if (permissions.products) return "products";
+    if (permissions.orders) return "orders";
+    if (permissions.requests) return "requests";
+    if (permissions.reviews) return "reviews";
+    if (permissions.coupons) return "coupons";
+    if (permissions.settings) return "settings";
+    if (permissions.admins) return "admins";
+    return "products";
+  };
+  
+  const [tab, setTab] = useState<keyof AdminPermissions>(getInitialTab());
   const [editing, setEditing] = useState<EditTarget>(null);
   const [loading, setLoading] = useState(true);
 
@@ -389,48 +415,62 @@ function Dashboard({
         </div>
 
         <div className="admin-tabs">
-          <button
-            className={`chip ${tab === "products" ? "active" : ""}`}
-            onClick={() => setTab("products")}
-          >
-            Products ({products.length})
-          </button>
-          <button
-            className={`chip ${tab === "orders" ? "active" : ""}`}
-            onClick={() => setTab("orders")}
-          >
-            Orders ({orders.length})
-          </button>
-          <button
-            className={`chip ${tab === "requests" ? "active" : ""}`}
-            onClick={() => setTab("requests")}
-          >
-            Requests ({requests.length})
-          </button>
-          <button
-            className={`chip ${tab === "reviews" ? "active" : ""}`}
-            onClick={() => setTab("reviews")}
-          >
-            Reviews ({reviews.length})
-          </button>
-          <button
-            className={`chip ${tab === "admins" ? "active" : ""}`}
-            onClick={() => setTab("admins")}
-          >
-            Admins
-          </button>
-          <button
-            className={`chip ${tab === "coupons" ? "active" : ""}`}
-            onClick={() => setTab("coupons")}
-          >
-            Coupons ({coupons.length})
-          </button>
-          <button
-            className={`chip ${tab === "settings" ? "active" : ""}`}
-            onClick={() => setTab("settings")}
-          >
-            Settings
-          </button>
+          {permissions.products && (
+            <button
+              className={`chip ${tab === "products" ? "active" : ""}`}
+              onClick={() => setTab("products")}
+            >
+              Products ({products.length})
+            </button>
+          )}
+          {permissions.orders && (
+            <button
+              className={`chip ${tab === "orders" ? "active" : ""}`}
+              onClick={() => setTab("orders")}
+            >
+              Orders ({orders.length})
+            </button>
+          )}
+          {permissions.requests && (
+            <button
+              className={`chip ${tab === "requests" ? "active" : ""}`}
+              onClick={() => setTab("requests")}
+            >
+              Requests ({requests.length})
+            </button>
+          )}
+          {permissions.reviews && (
+            <button
+              className={`chip ${tab === "reviews" ? "active" : ""}`}
+              onClick={() => setTab("reviews")}
+            >
+              Reviews ({reviews.length})
+            </button>
+          )}
+          {permissions.admins && (
+            <button
+              className={`chip ${tab === "admins" ? "active" : ""}`}
+              onClick={() => setTab("admins")}
+            >
+              Admins
+            </button>
+          )}
+          {permissions.coupons && (
+            <button
+              className={`chip ${tab === "coupons" ? "active" : ""}`}
+              onClick={() => setTab("coupons")}
+            >
+              Coupons ({coupons.length})
+            </button>
+          )}
+          {permissions.settings && (
+            <button
+              className={`chip ${tab === "settings" ? "active" : ""}`}
+              onClick={() => setTab("settings")}
+            >
+              Settings
+            </button>
+          )}
         </div>
 
         {tab === "settings" ? (
@@ -895,6 +935,7 @@ function AdminsPanel({ currentUser }: { currentUser: User }) {
       ).join("");
       const cred = await createUserWithEmailAndPassword(secAuth, em, tempPwd);
       await setDoc(doc(db, "admins", cred.user.uid), {
+        ...DEFAULT_PERMS,
         email: em,
         addedAt: new Date().toISOString(),
         note: `Added by ${currentUser.email}`,
@@ -910,6 +951,7 @@ function AdminsPanel({ currentUser }: { currentUser: User }) {
       const code = (e as { code?: string })?.code;
       if (code === "auth/email-already-in-use") {
         await setDoc(doc(db, "admins", em), {
+          ...DEFAULT_PERMS,
           email: em,
           addedAt: new Date().toISOString(),
           note: `Linked existing account by ${currentUser.email}`,
@@ -950,6 +992,23 @@ function AdminsPanel({ currentUser }: { currentUser: User }) {
     }
   };
 
+  const togglePermission = async (a: AdminEntry, perm: keyof AdminPermissions) => {
+    if (a.email === SUPER_ADMIN) {
+      showToast("Super admin permissions cannot be changed", false);
+      return;
+    }
+    try {
+      // Create a temporary updated permission object
+      const currentVal = (a as any)[perm] ?? false;
+      const updated = { [perm]: !currentVal };
+      await updateDoc(doc(db, "admins", a.uid), updated);
+      showToast("Permissions updated!");
+      load(); // Reload to reflect changes
+    } catch {
+      showToast("Failed to update permissions", false);
+    }
+  };
+
   return (
     <div className="admin-wrap">
       <div className="admin-card" style={{ marginBottom: 24 }}>
@@ -981,42 +1040,70 @@ function AdminsPanel({ currentUser }: { currentUser: User }) {
         <p className="admin-loading">Loading admins…</p>
       ) : (
         <div className="admin-table">
-          {admins.map((a) => (
-            <div className="admin-row" key={a.uid} style={{ gridTemplateColumns: "1fr auto" }}>
-              <div className="admin-row-main">
-                <p className="admin-row-name">
-                  {a.email}
-                  {a.uid === currentUser.uid && (
-                    <span className="admin-count"> (you)</span>
-                  )}
-                </p>
-                <p className="admin-row-meta">
-                  {a.note ? `${a.note} · ` : ""}
-                  {a.addedAt
-                    ? new Date(a.addedAt).toLocaleDateString("en-IN", {
-                        dateStyle: "medium",
-                      })
-                    : ""}
-                </p>
+          {admins.map((a) => {
+            const isSuper = a.email === SUPER_ADMIN;
+            return (
+              <div className="admin-row" key={a.uid} style={{ gridTemplateColumns: "1fr", gap: "16px", padding: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p className="admin-row-name">
+                      {a.email}
+                      {a.uid === currentUser.uid && (
+                        <span className="admin-count"> (you)</span>
+                      )}
+                      {isSuper && (
+                        <span className="admin-count" style={{ color: "#d4af37" }}> [SUPER ADMIN]</span>
+                      )}
+                    </p>
+                    <p className="admin-row-meta">
+                      {a.note ? `${a.note} · ` : ""}
+                      {a.addedAt
+                        ? new Date(a.addedAt).toLocaleDateString("en-IN", {
+                            dateStyle: "medium",
+                          })
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="admin-row-actions">
+                    <button
+                      className="admin-linkbtn"
+                      onClick={() => resendSetup(a)}
+                    >
+                      Resend email
+                    </button>
+                    {a.uid !== currentUser.uid && !isSuper && (
+                      <button
+                        className="admin-linkbtn admin-danger"
+                        onClick={() => removeAdmin(a)}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Permissions Grid */}
+                <div style={{ marginTop: 12, padding: "16px", background: "rgba(0,0,0,0.4)", borderRadius: 12, display: "flex", flexWrap: "wrap", gap: 16 }}>
+                  <p className="s-eyebrow" style={{ width: "100%", margin: 0, marginBottom: 8 }}>Permissions</p>
+                  {Object.keys(DEFAULT_PERMS).map((key) => {
+                    const perm = key as keyof AdminPermissions;
+                    const val = isSuper ? true : ((a as any)[perm] ?? false);
+                    return (
+                      <label key={perm} className="admin-check" style={{ opacity: isSuper ? 0.5 : 1 }}>
+                        <input 
+                          type="checkbox" 
+                          checked={val} 
+                          disabled={isSuper}
+                          onChange={() => togglePermission(a, perm)} 
+                        />
+                        <span style={{ textTransform: "capitalize" }}>{perm}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="admin-row-actions">
-                <button
-                  className="admin-linkbtn"
-                  onClick={() => resendSetup(a)}
-                >
-                  Resend email
-                </button>
-                {a.uid !== currentUser.uid && (
-                  <button
-                    className="admin-linkbtn admin-danger"
-                    onClick={() => removeAdmin(a)}
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
