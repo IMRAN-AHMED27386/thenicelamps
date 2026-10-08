@@ -593,7 +593,7 @@ function Dashboard({
             loading ? (
               <p className="admin-loading">Loading reviews…</p>
             ) : (
-              <AdminReviewsPanel reviews={reviews} onChanged={() => {}} />
+              <AdminReviewsPanel reviews={reviews} onChanged={() => {}} isSuperAdmin={currentUser.email === SUPER_ADMIN} />
             )
           ) : tab === "requests" ? (
             loading ? (
@@ -605,7 +605,7 @@ function Dashboard({
             loading ? (
               <p className="admin-loading">Loading orders…</p>
             ) : (
-              <OrdersPanel orders={orders} onChanged={() => {}} />
+              <OrdersPanel orders={orders} onChanged={() => {}} isSuperAdmin={currentUser.email === SUPER_ADMIN} />
             )
           ) : tab === "coupons" ? (
             <CouponsPanel coupons={coupons} />
@@ -993,9 +993,11 @@ function QtyCell({
 function OrdersPanel({
   orders,
   onChanged,
+  isSuperAdmin,
 }: {
   orders: Order[];
   onChanged: () => void;
+  isSuperAdmin?: boolean;
 }) {
   const [syncing, setSyncing] = useState(false);
 
@@ -1129,12 +1131,14 @@ function OrdersPanel({
                   </option>
                 ))}
               </select>
-              <button
-                className="admin-linkbtn admin-danger"
-                onClick={() => remove(o)}
-              >
-                Delete
-              </button>
+              {isSuperAdmin && (
+                <button
+                  className="admin-linkbtn admin-danger"
+                  onClick={() => remove(o)}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
 
@@ -1969,9 +1973,11 @@ function SettingsPanel() {
 function AdminReviewsPanel({
   reviews,
   onChanged,
+  isSuperAdmin,
 }: {
   reviews: Review[];
   onChanged: () => void;
+  isSuperAdmin?: boolean;
 }) {
   const removeReview = async (r: Review) => {
     if (!confirm(`Delete review "${r.title}" by ${r.userName}?`)) return;
@@ -2020,12 +2026,14 @@ function AdminReviewsPanel({
                 <span style={{ color: "#F5C518" }}>
                   {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
                 </span>
-                <button
-                  className="admin-linkbtn admin-danger"
-                  onClick={() => removeReview(r)}
-                >
-                  Delete
-                </button>
+                {isSuperAdmin && (
+                  <button
+                    className="admin-linkbtn admin-danger"
+                    onClick={() => removeReview(r)}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
               <p className="admin-row-name" style={{ fontSize: "0.88rem" }}>
                 {r.title}
