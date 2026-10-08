@@ -13,7 +13,7 @@ service cloud.firestore {
     match /admins/{uid} {
       allow read: if isAdmin();
       allow create, delete: if isAdmin();
-      allow update: if false;
+      allow update: if isAdmin();
     }
 
     match /products/{id} {
