@@ -1847,13 +1847,16 @@ function CategoryCard({
       </div>
 
       <div className="admin-form-actions">
-        <button
-          className="btn-gold admin-btn"
-          onClick={save}
-          disabled={busy}
-        >
-          {busy ? "Saving…" : "Save Category"}
-        </button>
+        {!isNew && (
+          <button
+            className="admin-linkbtn admin-danger"
+            onClick={remove}
+            disabled={busy}
+            style={{ marginRight: "auto" }}
+          >
+            Delete
+          </button>
+        )}
         {onCancel && (
           <button
             className="admin-linkbtn"
@@ -1863,16 +1866,13 @@ function CategoryCard({
             Cancel
           </button>
         )}
-        {!isNew && (
-          <button
-            className="admin-linkbtn admin-danger"
-            onClick={remove}
-            disabled={busy}
-            style={{ marginLeft: "auto" }}
-          >
-            Delete
-          </button>
-        )}
+        <button
+          className="btn-gold admin-btn-sm"
+          onClick={save}
+          disabled={busy}
+        >
+          {busy ? "Saving…" : "Save Category"}
+        </button>
       </div>
       </div>
     </div>
