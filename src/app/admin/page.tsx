@@ -273,6 +273,7 @@ function Dashboard({
   
   const [tab, setTab] = useState<string>(getInitialTab());
   const [editing, setEditing] = useState<EditTarget>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | "new" | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadStaticData = async () => {
@@ -406,9 +407,11 @@ function Dashboard({
             <>
               <button className={`admin-nav-item ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab("categories")}>
                 <FolderTree size={18} /> <span>Categories</span>
+                {categories.length > 0 && <span className="admin-badge">{categories.length}</span>}
               </button>
               <button className={`admin-nav-item ${tab === 'products' ? 'active' : ''}`} onClick={() => setTab("products")}>
                 <Package size={18} /> <span>Products</span>
+                {products.length > 0 && <span className="admin-badge">{products.length}</span>}
               </button>
             </>
           )}
@@ -557,14 +560,45 @@ function Dashboard({
           ) : tab === "coupons" ? (
             <CouponsPanel coupons={coupons} />
           ) : tab === "categories" ? (
-            <div className="admin-panel-card" style={{ maxWidth: 800 }}>
+            <div className="admin-panel-card">
               <div className="admin-panel-header">
-                <h3>All Categories</h3>
-                <button className="btn-gold admin-btn-sm" onClick={() => setEditing("new")}>
-                  + ADD CATEGORY
-                </button>
+                <h3>All Categories ({categories.length})</h3>
+                <div className="admin-panel-actions">
+                  <div className="admin-search-wrap sm">
+                    <Search size={14} />
+                    <input type="text" placeholder="Search categories..." className="admin-search-input sm" />
+                  </div>
+                </div>
               </div>
-              <CategoriesEditor categories={categories} onSaved={loadStaticData} />
+              <div className="admin-table">
+                {categories.map((c) => (
+                  <div className="admin-row" key={c.slug}>
+                    {c.image ? <img className="admin-thumb" src={c.image} alt={c.name} /> : <div className="admin-thumb" style={{background: '#333'}} />}
+                    <div className="admin-row-main">
+                      <p className="admin-row-name">{c.name}</p>
+                      <p className="admin-row-meta">{c.tagline || 'No tagline'}</p>
+                    </div>
+                    <div className="admin-row-toggles">
+                      <span className="admin-pill" style={{opacity: 0.7}}>Order: {(c as any).order ?? 0}</span>
+                    </div>
+                    <div className="admin-row-actions">
+                      <button className="admin-action-btn edit" onClick={() => setEditingCategory(c)}>
+                        EDIT
+                      </button>
+                      <button className="admin-action-btn delete" onClick={async () => {
+                        if (confirm(`Delete category "${c.name}"?`)) {
+                          try {
+                            await deleteDoc(doc(db, "categories", c.slug));
+                            loadStaticData();
+                          } catch {}
+                        }
+                      }}>
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : tab === "overview" ? (
             <div className="admin-overview-content">
@@ -1615,7 +1649,7 @@ function CategoryCard({
   };
 
   return (
-    <div className="admin-card">
+    <div className="admin-form-group">
       <label className="admin-label">Name</label>
       <input
         className="admin-input"
@@ -1902,7 +1936,7 @@ function CouponsPanel({ coupons }: { coupons: Coupon[] }) {
 
   return (
     <div className="admin-grid2">
-      <div className="admin-card">
+      <div className="admin-form-group">
         <h2 className="checkout-h2">Create Coupon</h2>
         <label className="admin-label">Coupon Code</label>
         <input className="admin-input" placeholder="e.g. FLAT500" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
