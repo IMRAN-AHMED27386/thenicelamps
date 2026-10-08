@@ -259,6 +259,7 @@ function Dashboard({
   const [requests, setRequests] = useState<StockRequest[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const getInitialTab = (): string => {
     if (permissions.products) return "overview";
@@ -388,8 +389,21 @@ function Dashboard({
     }
   };
 
+  const searchLower = searchQuery.toLowerCase();
+  
+  const visibleCategories = categories.filter(c => 
+    !searchQuery || 
+    c.name.toLowerCase().includes(searchLower) || 
+    (c.tagline && c.tagline.toLowerCase().includes(searchLower))
+  );
+
+  const visibleProducts = products.filter(p => 
+    !searchQuery || 
+    p.name.toLowerCase().includes(searchLower) || 
+    p.slug.toLowerCase().includes(searchLower)
+  );
+
   return (
-    
     <div className="admin-layout">
       {/* Sidebar */}
       <aside className="admin-sidebar">
@@ -458,7 +472,7 @@ function Dashboard({
         <header className="admin-topbar">
           <div className="admin-search-wrap">
             <Search size={18} />
-            <input type="text" placeholder="Search products, categories..." className="admin-search-input" />
+            <input type="text" placeholder="Search products, categories..." className="admin-search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="admin-top-actions">
             {tab === "products" && (
@@ -571,12 +585,12 @@ function Dashboard({
                 <div className="admin-panel-actions">
                   <div className="admin-search-wrap sm">
                     <Search size={14} />
-                    <input type="text" placeholder="Search categories..." className="admin-search-input sm" />
+                    <input type="text" placeholder="Search categories..." className="admin-search-input sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   </div>
                 </div>
               </div>
               <div className="admin-table">
-                {categories.map((c) => (
+                {visibleCategories.map((c) => (
                   <div className="admin-row" key={c.slug}>
                     {c.image ? <img className="admin-thumb" src={c.image} alt={c.name} /> : <div className="admin-thumb" style={{background: '#333'}} />}
                     <div className="admin-row-main">
@@ -618,7 +632,7 @@ function Dashboard({
                   <div className="admin-panel-actions">
                     <div className="admin-search-wrap sm">
                       <Search size={14} />
-                      <input type="text" placeholder="Search products..." className="admin-search-input sm" />
+                      <input type="text" placeholder="Search products..." className="admin-search-input sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
                     <select className="admin-input-sm">
                       <option>Newest First</option>
@@ -626,7 +640,7 @@ function Dashboard({
                   </div>
                 </div>
                 <div className="admin-table">
-                  {products.map((p) => (
+                  {visibleProducts.map((p) => (
                     <div className="admin-row" key={p.slug}>
                       <img className="admin-thumb" src={p.images[0]} alt={p.name} />
                       <div className="admin-row-main">
@@ -704,6 +718,24 @@ function Dashboard({
               loadStaticData();
             }}
           />
+        )}
+        {editingCategory && (
+          <div className="admin-modal">
+            <div className="admin-modal-content" style={{maxWidth: 500}}>
+              <div className="admin-panel-header">
+                <h3>{editingCategory === "new" ? "Add Category" : "Edit Category"}</h3>
+                <button className="admin-close-btn" onClick={() => setEditingCategory(null)}>×</button>
+              </div>
+              <CategoryCard 
+                category={editingCategory === "new" ? null : editingCategory}
+                onSaved={() => {
+                  setEditingCategory(null);
+                  loadStaticData();
+                }}
+                onCancel={() => setEditingCategory(null)}
+              />
+            </div>
+          </div>
         )}
       </div>
   );
