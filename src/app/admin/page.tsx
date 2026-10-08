@@ -471,9 +471,24 @@ function Dashboard({
       <main className="admin-main">
         {/* Topbar */}
         <header className="admin-topbar">
-          <div className="admin-search-wrap">
-            <Search size={18} />
-            <input type="text" placeholder="Search products, categories..." className="admin-search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <div className="admin-search-wrap" onClick={() => {
+            const input = document.getElementById('admin-global-search');
+            if (input) input.focus();
+          }}>
+            <Search size={18} style={{ cursor: 'text' }} />
+            <input 
+              id="admin-global-search"
+              type="text" 
+              placeholder="Search products, categories..." 
+              className="admin-search-input" 
+              value={searchQuery} 
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value && tab !== 'products' && tab !== 'categories') {
+                  setTab('products');
+                }
+              }} 
+            />
           </div>
           <div className="admin-top-actions">
             {tab === "products" && (
@@ -486,9 +501,6 @@ function Dashboard({
                 + ADD CATEGORY
               </button>
             )}
-            <div className="admin-avatar">
-              <UserIcon size={20} />
-            </div>
           </div>
         </header>
 
@@ -523,9 +535,13 @@ function Dashboard({
             </p>
             </div>
             {tab === "overview" && (
-              <div className="admin-search-wrap sm" style={{ background: 'transparent', border: '1px solid #333', cursor: 'pointer' }}>
+              <div 
+                className="admin-search-wrap sm" 
+                style={{ background: 'transparent', border: '1px solid #333', cursor: 'pointer' }}
+                onClick={() => alert("Advanced date filtering requires backend integration. Showing Last 7 Days by default.")}
+              >
                 <Calendar size={14} style={{ color: '#888' }} />
-                <span style={{ fontSize: '0.85rem', padding: '0 10px', color: '#ccc' }}>Oct 1, 2026 - Oct 7, 2026</span>
+                <span style={{ fontSize: '0.85rem', padding: '0 10px', color: '#ccc' }}>Last 7 Days</span>
                 <ChevronDown size={14} style={{ color: '#888' }} />
               </div>
             )}
@@ -639,10 +655,15 @@ function Dashboard({
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: '0 0 5px 0' }}>Sales Overview</h3>
                     <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Total orders and revenue for the selected period</p>
                   </div>
-                  <div className="admin-search-wrap sm" style={{ width: 'auto', background: 'transparent', border: '1px solid #333' }}>
-                    <span style={{ fontSize: '0.9rem' }}>Orders</span>
-                    <ChevronDown size={14} style={{ marginLeft: 10, color: '#888' }} />
-                  </div>
+                  <select 
+                    style={{ background: 'transparent', border: '1px solid #333', color: '#ccc', padding: '4px 10px', borderRadius: '8px', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}
+                    onChange={(e) => {
+                      if(e.target.value === 'revenue') alert("Revenue chart coming soon! Showing Orders.");
+                    }}
+                  >
+                    <option value="orders" style={{ background: '#1a1a1a' }}>Orders</option>
+                    <option value="revenue" style={{ background: '#1a1a1a' }}>Revenue</option>
+                  </select>
                 </div>
                 
                 <div style={{ width: '100%', height: 250 }}>
@@ -683,7 +704,9 @@ function Dashboard({
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: '0 0 5px 0' }}>Recent Orders</h3>
                     <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>Latest orders from customers</p>
                   </div>
-                  <button style={{ background: 'transparent', border: 'none', color: '#f5d061', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <button 
+                    onClick={() => setTab("orders")}
+                    style={{ background: 'transparent', border: 'none', color: '#f5d061', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     View all <ArrowRight size={14} />
                   </button>
                 </div>
