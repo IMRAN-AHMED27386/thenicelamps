@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ShoppingCart, MessageSquare, Star, Tag, Settings, LogOut, Search, User as UserIcon } from "lucide-react";
+import { Package, ShoppingCart, MessageSquare, Star, Tag, Settings, LogOut, Search, User as UserIcon, LayoutDashboard, FolderTree } from "lucide-react";
 import { getApps, initializeApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
@@ -260,8 +260,8 @@ function Dashboard({
   const [reviews, setReviews] = useState<Review[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   
-  const getInitialTab = (): keyof AdminPermissions => {
-    if (permissions.products) return "products";
+  const getInitialTab = (): string => {
+    if (permissions.products) return "overview";
     if (permissions.orders) return "orders";
     if (permissions.requests) return "requests";
     if (permissions.reviews) return "reviews";
@@ -271,7 +271,7 @@ function Dashboard({
     return "products";
   };
   
-  const [tab, setTab] = useState<keyof AdminPermissions>(getInitialTab());
+  const [tab, setTab] = useState<string>(getInitialTab());
   const [editing, setEditing] = useState<EditTarget>(null);
   const [loading, setLoading] = useState(true);
 
@@ -397,12 +397,22 @@ function Dashboard({
           <span className="admin-logo-sub">ADMIN</span>
         </div>
         
+        
         <nav className="admin-nav">
+          <button className={`admin-nav-item ${tab === 'overview' ? 'active' : ''}`} onClick={() => setTab("overview")}>
+            <LayoutDashboard size={18} /> <span>Overview</span>
+          </button>
           {permissions.products && (
-            <button className={`admin-nav-item ${tab === 'products' ? 'active' : ''}`} onClick={() => setTab("products")}>
-              <Package size={18} /> <span>Products</span>
-            </button>
+            <>
+              <button className={`admin-nav-item ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab("categories")}>
+                <FolderTree size={18} /> <span>Categories</span>
+              </button>
+              <button className={`admin-nav-item ${tab === 'products' ? 'active' : ''}`} onClick={() => setTab("products")}>
+                <Package size={18} /> <span>Products</span>
+              </button>
+            </>
           )}
+
           {permissions.orders && (
             <button className={`admin-nav-item ${tab === 'orders' ? 'active' : ''}`} onClick={() => setTab("orders")}>
               <ShoppingCart size={18} /> <span>Orders</span>
@@ -448,7 +458,11 @@ function Dashboard({
             <input type="text" placeholder="Search products, categories..." className="admin-search-input" />
           </div>
           <div className="admin-top-actions">
-            {tab === "products" && (
+            {tab === "overview"
+                ? "Overview"
+                : tab === "categories"
+                  ? "Categories"
+                  : tab === "products" && (
               <button className="btn-gold admin-btn-sm" onClick={() => setEditing("new")}>
                 + ADD PRODUCT
               </button>
@@ -477,13 +491,15 @@ function Dashboard({
                           : "Admins"}
             </h1>
             <p className="admin-subtitle">
-              {tab === "products" && "Manage your products, categories and inventory"}
+              {tab === "overview" && "Dashboard summary and reports"}
+              {tab === "categories" && "Manage your product categories"}
+              {tab === "products" && "Manage your products and inventory"}
               {tab === "orders" && "View and manage customer orders"}
               {tab === "settings" && "Configure store settings"}
             </p>
           </div>
 
-          {tab === "products" && (
+          {tab === "overview" && (
             <div className="admin-summary-cards">
               <div className="admin-summary-card">
                 <div className="summary-icon"><Package size={24} /></div>
@@ -540,12 +556,25 @@ function Dashboard({
             )
           ) : tab === "coupons" ? (
             <CouponsPanel coupons={coupons} />
+          ) : tab === "categories" ? (
+            <div className="admin-panel-card" style={{ maxWidth: 800 }}>
+              <div className="admin-panel-header">
+                <h3>All Categories</h3>
+                <button className="btn-gold admin-btn-sm" onClick={() => setEditing("new")}>
+                  + ADD CATEGORY
+                </button>
+              </div>
+              <CategoriesEditor categories={categories} onSaved={loadStaticData} />
+            </div>
+          ) : tab === "overview" ? (
+            <div className="admin-overview-content">
+              {/* Optional: Add recent orders or more stats here later */}
+            </div>
           ) : loading ? (
             <p className="admin-loading">Loading products…</p>
           ) : (
-            <div className="admin-products-layout">
-              <div className="admin-panel-card">
-                <div className="admin-panel-header">
+            <div className="admin-panel-card">
+              <div className="admin-panel-header">
                   <h3>Product List ({products.length})</h3>
                   <div className="admin-panel-actions">
                     <div className="admin-search-wrap sm">
@@ -620,13 +649,6 @@ function Dashboard({
                   ))}
                 </div>
               </div>
-              <div className="admin-panel-card right-col">
-                <div className="admin-panel-header">
-                  <h3>Categories</h3>
-                </div>
-                <CategoriesEditor categories={categories} onSaved={loadStaticData} />
-              </div>
-            </div>
           )}
         </div>
       </main>

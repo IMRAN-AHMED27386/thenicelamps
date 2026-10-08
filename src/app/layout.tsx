@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import Effects from "@/components/Effects";
-import BottomTabs from "@/components/BottomTabs";
+import ClientWrapper from "./ClientWrapper";
 
 // Runs before paint: tags <html> as an installed PWA so the app-style
 // bottom tab bar shows without a flash of the browser layout. Covers both
@@ -70,11 +67,7 @@ export default function RootLayout({
       <body>
         <WishlistProvider>
           <CartProvider>
-            <Nav />
-            {children}
-            <Footer />
-            <Effects />
-            <BottomTabs />
+            <ClientWrapper>{children}</ClientWrapper>
           </CartProvider>
         </WishlistProvider>
       </body>
