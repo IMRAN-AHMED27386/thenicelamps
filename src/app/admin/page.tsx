@@ -119,20 +119,23 @@ export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [permissions, setPermissions] = useState<AdminPermissions | null>(null);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
+        setPermissionsLoaded(false);
         try {
           if (u.email === SUPER_ADMIN) {
             setPermissions(FULL_PERMS);
           } else {
-            let snap = await getDoc(doc(db, "admins", u.uid));
-            if (!snap.exists() && u.email) {
-              snap = await getDoc(doc(db, "admins", u.email.toLowerCase()));
-            }
-            if (snap.exists()) {
+            const [uidSnap, emailSnap] = await Promise.all([
+              getDoc(doc(db, "admins", u.uid)),
+              u.email ? getDoc(doc(db, "admins", u.email.toLowerCase())) : Promise.resolve(null)
+            ]);
+            const snap = uidSnap.exists() ? uidSnap : (emailSnap?.exists() ? emailSnap : null);
+            if (snap) {
               setPermissions({ ...DEFAULT_PERMS, ...(snap.data() as Partial<AdminPermissions>) });
             } else {
               setPermissions(null);
@@ -141,14 +144,16 @@ export default function AdminPage() {
         } catch {
           setPermissions(null);
         }
+        setPermissionsLoaded(true);
       } else {
         setPermissions(null);
+        setPermissionsLoaded(true);
       }
       setAuthReady(true);
     });
   }, []);
 
-  if (!authReady || (user && permissions === null && !user.email)) {
+  if (!authReady || (user && !permissionsLoaded)) {
     return (
       <main className="page-main">
         <p className="admin-loading">Loading…</p>

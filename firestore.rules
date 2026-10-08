@@ -87,6 +87,11 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /coupons/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
