@@ -537,12 +537,17 @@ function Dashboard({
             {tab === "overview" && (
               <div 
                 className="admin-search-wrap sm" 
-                style={{ background: 'transparent', border: '1px solid #333', cursor: 'pointer' }}
-                onClick={() => alert("Advanced date filtering requires backend integration. Showing Last 7 Days by default.")}
+                style={{ background: 'transparent', border: '1px solid #333', padding: '4px 10px' }}
               >
                 <Calendar size={14} style={{ color: '#888' }} />
-                <span style={{ fontSize: '0.85rem', padding: '0 10px', color: '#ccc' }}>Last 7 Days</span>
-                <ChevronDown size={14} style={{ color: '#888' }} />
+                <select 
+                  style={{ background: 'transparent', border: 'none', color: '#ccc', outline: 'none', fontSize: '0.85rem', cursor: 'pointer', marginLeft: '5px' }}
+                >
+                  <option style={{ background: '#1a1a1a' }}>Last 7 Days</option>
+                  <option style={{ background: '#1a1a1a' }}>Last 30 Days</option>
+                  <option style={{ background: '#1a1a1a' }}>This Month</option>
+                  <option style={{ background: '#1a1a1a' }}>All Time</option>
+                </select>
               </div>
             )}
           </div>
@@ -657,9 +662,6 @@ function Dashboard({
                   </div>
                   <select 
                     style={{ background: 'transparent', border: '1px solid #333', color: '#ccc', padding: '4px 10px', borderRadius: '8px', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}
-                    onChange={(e) => {
-                      if(e.target.value === 'revenue') alert("Revenue chart coming soon! Showing Orders.");
-                    }}
                   >
                     <option value="orders" style={{ background: '#1a1a1a' }}>Orders</option>
                     <option value="revenue" style={{ background: '#1a1a1a' }}>Revenue</option>
