@@ -720,22 +720,14 @@ function Dashboard({
           />
         )}
         {editingCategory && (
-          <div className="admin-modal">
-            <div className="admin-modal-content" style={{maxWidth: 500}}>
-              <div className="admin-panel-header">
-                <h3>{editingCategory === "new" ? "Add Category" : "Edit Category"}</h3>
-                <button className="admin-close-btn" onClick={() => setEditingCategory(null)}>×</button>
-              </div>
-              <CategoryCard 
-                category={editingCategory === "new" ? null : editingCategory}
-                onSaved={() => {
-                  setEditingCategory(null);
-                  loadStaticData();
-                }}
-                onCancel={() => setEditingCategory(null)}
-              />
-            </div>
-          </div>
+          <CategoryCard 
+            category={editingCategory === "new" ? null : editingCategory}
+            onSaved={() => {
+              setEditingCategory(null);
+              loadStaticData();
+            }}
+            onCancel={() => setEditingCategory(null)}
+          />
         )}
       </div>
   );
@@ -1686,14 +1678,19 @@ function CategoryCard({
   };
 
   return (
-    <div className="admin-form-group">
-      <label className="admin-label">Name</label>
-      <input
-        className="admin-input"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="e.g. Summer Collection"
-      />
+    <div className="admin-modal">
+      <div className="admin-card admin-form" style={{ maxWidth: 600 }}>
+        <h2 className="admin-title">
+          {isNew ? "New Category" : "Edit Category"}
+        </h2>
+
+        <label className="admin-label">Name</label>
+        <input
+          className="admin-input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Summer Collection"
+        />
 
       <label className="admin-label">Tagline</label>
       <input
@@ -1734,15 +1731,15 @@ function CategoryCard({
         <UploadButton folder="categories" onDone={setImage} />
       </div>
 
-      <div style={{ marginTop: 12, display: "flex", gap: "12px", flexWrap: "wrap" }}>
+      <div className="admin-form-actions">
         <button
-          className="btn-rose admin-btn-sm"
+          className="btn-gold admin-btn"
           onClick={save}
           disabled={busy}
         >
-          {busy ? "Saving…" : "Save"}
+          {busy ? "Saving…" : "Save Category"}
         </button>
-        {isNew && onCancel && (
+        {onCancel && (
           <button
             className="admin-linkbtn"
             onClick={onCancel}
@@ -1761,6 +1758,7 @@ function CategoryCard({
             Delete
           </button>
         )}
+      </div>
       </div>
     </div>
   );
