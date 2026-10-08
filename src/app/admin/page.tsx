@@ -1173,7 +1173,8 @@ function ProductForm({
       showToast("Name, price and at least one photo are required", false);
       return;
     }
-    const slug = product?.slug ?? slugify(name);
+    const baseSlug = slugify(name);
+    const slug = product?.slug ?? `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
     setBusy(true);
     try {
       await setDoc(
