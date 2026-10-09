@@ -1513,23 +1513,28 @@ function ProductForm({
 
   return (
     <div className="admin-modal">
-      <div className="admin-card admin-form">
+      <form 
+        className="admin-card admin-form" 
+        onSubmit={(e) => { e.preventDefault(); save(); }}
+      >
         <h2 className="admin-title">
           {product ? "Edit Product" : "New Product"}
         </h2>
 
-        <label className="admin-label">Name</label>
+        <label className="admin-label">Name *</label>
         <input
           className="admin-input"
+          required
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <div className="admin-grid2">
           <div>
-            <label className="admin-label">Category</label>
+            <label className="admin-label">Category *</label>
             <select
               className="admin-input"
+              required
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -1552,10 +1557,11 @@ function ProductForm({
 
         <div className="admin-grid2">
           <div>
-            <label className="admin-label">Price (₹)</label>
+            <label className="admin-label">Price (₹) *</label>
             <input
               className="admin-input"
               type="number"
+              required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -1571,29 +1577,32 @@ function ProductForm({
           </div>
         </div>
 
-        <label className="admin-label">Description</label>
+        <label className="admin-label">Description *</label>
         <textarea
           className="admin-input admin-textarea"
+          required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <label className="admin-label">Sizes (comma separated)</label>
+        <label className="admin-label">Sizes (comma separated) *</label>
         <input
           className="admin-input"
+          required
           value={sizes}
           onChange={(e) => setSizes(e.target.value)}
         />
 
         <label className="admin-label">
           Photos ({images.filter((x) => x.trim()).length}/{MAX_IMAGES}) — first
-          photo is the main one
+          photo is the main one *
         </label>
         {images.map((img, i) => (
           <div key={i} style={{ marginBottom: 10 }}>
             <div className="admin-imgrow admin-imgrow-3">
               <input
                 className="admin-input"
+                required={i === 0}
                 value={img}
                 onChange={(e) => setImageAt(i, e.target.value)}
                 placeholder={
@@ -1696,18 +1705,18 @@ function ProductForm({
         </div>
 
         <div className="admin-form-actions">
-          <button className="admin-linkbtn" onClick={onClose}>
+          <button type="button" className="admin-linkbtn" onClick={onClose}>
             Cancel
           </button>
           <button
+            type="submit"
             className="btn-rose admin-btn-sm"
-            onClick={save}
             disabled={busy}
           >
             {busy ? "Saving…" : "Save Product"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
@@ -1823,20 +1832,25 @@ function CategoryCard({
 
   return (
     <div className="admin-modal">
-      <div className="admin-card admin-form" style={{ maxWidth: 600 }}>
+      <form 
+        className="admin-card admin-form" 
+        style={{ maxWidth: 600 }}
+        onSubmit={(e) => { e.preventDefault(); save(); }}
+      >
         <h2 className="admin-title">
           {isNew ? "New Category" : "Edit Category"}
         </h2>
 
-        <label className="admin-label">Name</label>
+        <label className="admin-label">Name *</label>
         <input
           className="admin-input"
+          required
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Summer Collection"
         />
 
-      <label className="admin-label">Tagline</label>
+      <label className="admin-label">Tagline (optional)</label>
       <input
         className="admin-input"
         value={tagline}
@@ -1864,10 +1878,11 @@ function CategoryCard({
         <UploadButton folder="categories" onDone={setSizeGuide} />
       </div>
 
-      <label className="admin-label">Image URL</label>
+      <label className="admin-label">Image URL *</label>
       <div className="admin-imgrow">
         <input
           className="admin-input"
+          required
           value={image}
           onChange={(e) => setImage(e.target.value)}
           placeholder="/cat1.jpg or upload..."
@@ -1878,6 +1893,7 @@ function CategoryCard({
       <div className="admin-form-actions">
         {!isNew && (
           <button
+            type="button"
             className="admin-linkbtn admin-danger"
             onClick={remove}
             disabled={busy}
@@ -1888,6 +1904,7 @@ function CategoryCard({
         )}
         {onCancel && (
           <button
+            type="button"
             className="admin-linkbtn"
             onClick={onCancel}
             disabled={busy}
@@ -1896,14 +1913,14 @@ function CategoryCard({
           </button>
         )}
         <button
+          type="submit"
           className="btn-gold admin-btn-sm"
-          onClick={save}
           disabled={busy}
         >
           {busy ? "Saving…" : "Save Category"}
         </button>
       </div>
-      </div>
+      </form>
     </div>
   );
 }
